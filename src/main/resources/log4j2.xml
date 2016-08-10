@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+		</Console>
+		<File name="File1" fileName="/data1/logs/feb/hc.log"
+			bufferedIO="true">
+			<PatternLayout
+				pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+		</File>
+		<File name="File2" fileName="/data1/logs/feb/main.log"
+			bufferedIO="true">
+			<PatternLayout
+				pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+		</File>
+		<File name="File_mapservice" fileName="/data1/logs/feb/mapservice.log"
+            bufferedIO="true">
+            <PatternLayout
+                pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+        </File>
+	</Appenders>
+	<Loggers>
+		<Logger name="leigh.ai.game.feb.util.HttpUtil" level="debug" additivity="false">
+			<AppenderRef ref="File1"></AppenderRef>
+		</Logger>
+		<Logger name="org.apache.http.wire" level="debug" additivity="false">
+    		<AppenderRef ref="File1"></AppenderRef>
+		</Logger>
+		<Logger name="org.apache.http" level="error" additivity="false">
+            <AppenderRef ref="File1"></AppenderRef>
+        </Logger>
+        <Logger name="leigh.ai.game.feb.service.MapService" level="debug" additivity="false">
+            <AppenderRef ref="File_mapservice"></AppenderRef>
+        </Logger>
+        <Logger name="leigh.ai.game.feb.util.FakeSleepUtil" level="error" additivity="false">
+            <AppenderRef ref="Console"></AppenderRef>
+        </Logger>
+		<Root level="debug">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="File2"></AppenderRef>
+		</Root>
+	</Loggers>
+</Configuration>
