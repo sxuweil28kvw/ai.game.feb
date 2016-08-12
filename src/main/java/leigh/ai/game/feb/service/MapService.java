@@ -82,7 +82,16 @@ public class MapService {
 		mlkn.add(map.get(1160));
 		mlkn.add(map.get(1198));
 		//副本
-		
+		Set<MapNode> tower = map.get(1114).getNeighbours(Traffic.raid_exit);
+		tower.add(map.get(-1));
+		tower.add(map.get(-2));
+		tower.add(map.get(-3));
+		tower.add(map.get(-4));
+		tower.add(map.get(-5));
+		tower.add(map.get(-6));
+		tower.add(map.get(-7));
+		tower.add(map.get(-8));
+		map.get(1184).getNeighbours(Traffic.raid_exit).add(map.get(-9));
 	}
 	/*
 	public static void printMap() {
@@ -141,12 +150,13 @@ public class MapService {
 	}
 	private static MapPath expandPath(Map<Integer, MapPath> path, int targetLength, Map<Integer, MapPath> otherPath) {
 		logger.debug("expandPath, targetLength=" + targetLength);
-		MapPath walk = expandByTraffic(path, targetLength, otherPath, Traffic.walk);
-		if(walk != null) {
-			return walk;
+		for(Traffic traffic: Traffic.values()) {
+			MapPath p = expandByTraffic(path, targetLength, otherPath, traffic);
+			if(p != null) {
+				return p;
+			}
 		}
-		MapPath ship = expandByTraffic(path, targetLength, otherPath, Traffic.ship);
-		return ship;
+		return null;
 	}
 	private static MapPath expandByTraffic(Map<Integer, MapPath> path,
 			int targetLength, Map<Integer, MapPath> otherPath, Traffic traffic) {

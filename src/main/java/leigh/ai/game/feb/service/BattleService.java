@@ -53,6 +53,7 @@ public class BattleService {
 			}
 		}
 		if(!hasShengshui) {
+			buyHolywater();
 			FacilityService.buyItem("aaac");
 		}
 		addAp();
@@ -90,19 +91,22 @@ public class BattleService {
 		logger.debug("使用了回复之杖");
 	}
 	public static void buyMedicine() {
-		if(PersonStatusService.money < 1000) {
-			FacilityService.drawCash(19000);
-		}
-		MapPath path = MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[] {FacilityType.itemshop});
-		MoveService.movePath(path, BattleConfig.never);
-		HttpUtil.get("shopits.php");
-		String itemcode = "aaab";
-		if(PersonStatusService.maxHP <= 40) {
-			itemcode = "aaaa";
-		}
-		FacilityService.buyItem(itemcode);
-		if(logger.isDebugEnabled()) {
-			logger.debug("购买了" + (itemcode.equals("aaaa") ? "伤药" : "万灵药"));
+		if(PersonStatusService.memberCard) {
+			MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[]{FacilityType.itemshopMember}));
+			FacilityService.drawCash(25000);
+			FacilityService.buyItem("aaah");
+		} else if(JobService.canUseStaff()) {
+			if(PersonStatusService.money < 1000) {
+				FacilityService.drawCash(19000);
+			}
+			MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[]{FacilityType.itemshop}));
+			FacilityService.buyItem("eaaa");
+		} else {
+			if(PersonStatusService.money < 1000) {
+				FacilityService.drawCash(19000);
+			}
+			MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[]{FacilityType.itemshop}));
+			FacilityService.buyItem("aaab");
 		}
 		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
 	}
@@ -111,5 +115,18 @@ public class BattleService {
 		PersonStatusParser.parseAfterUseItem(personStat);
 		String items = HttpUtil.get("useitem.php");
 		PersonStatusParser.itemsAfterUse(items);
+	}
+	public static void buyHolywater() {
+		if(PersonStatusService.memberCard) {
+			MoveService.moveTo(1198);
+			FacilityService.drawCash(25000);
+			FacilityService.buyItem("aaai");
+		} else {
+			if(PersonStatusService.money < 1000) {
+				FacilityService.drawCash(19000);
+			}
+			MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[]{FacilityType.itemshop}));
+			FacilityService.buyItem("aaac");
+		}
 	}
 }

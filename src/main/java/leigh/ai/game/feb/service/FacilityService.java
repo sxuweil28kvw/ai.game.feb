@@ -8,6 +8,7 @@ import java.util.Map;
 import leigh.ai.game.feb.parsers.BankParser;
 import leigh.ai.game.feb.parsers.PersonStatusParser;
 import leigh.ai.game.feb.parsers.WeaponShopParser;
+import leigh.ai.game.feb.service.MyStatus.MyItem;
 import leigh.ai.game.feb.service.map.MapPath;
 import leigh.ai.game.feb.util.FakeSleepUtil;
 import leigh.ai.game.feb.util.HttpUtil;
@@ -100,7 +101,8 @@ public class FacilityService {
 	public static void buyItem(String itemcode) {
 		HttpUtil.get("shopits_co.php?goto=buy&buytype=0&item=" + itemcode);
 		HttpUtil.get("shopits_updata.php?goto=buy&buytype=0&item=" + itemcode);
-		PersonStatusService.update();
+		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
+		logger.debug("购买了" + MyItem.lookup.get(itemcode));
 	}
 	public static int queryBankSlots() {
 		MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[] {FacilityType.bank}));

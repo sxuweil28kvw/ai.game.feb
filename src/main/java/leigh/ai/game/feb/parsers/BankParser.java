@@ -26,6 +26,9 @@ public class BankParser {
 		PersonStatusService.bankItems = new ArrayList<MyItem>();
 		Document doc = Jsoup.parse(str);
 		Element table = doc.body().child(0);
+		if(table.children().size() == 0) {
+			return;
+		}
 		for(int i = 0; i < table.child(0).children().size(); i++) {
 			Element tr = table.child(0).child(i);
 			for(int j = 0; j < tr.children().size(); j += 2) {

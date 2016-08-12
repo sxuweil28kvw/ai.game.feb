@@ -9,7 +9,7 @@ public class JobService {
 				|| job.equals("圣女")
 				|| job.equals("司祭")
 				|| job.equals("贤者")
-				|| job.equals("德鲁伊")) {
+				|| job.equals("德鲁依")) {
 			return true;
 		}
 		return false;

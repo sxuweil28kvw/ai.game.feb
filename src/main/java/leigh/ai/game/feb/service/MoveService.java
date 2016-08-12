@@ -3,6 +3,7 @@ package leigh.ai.game.feb.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import leigh.ai.game.feb.parsers.PersonStatusParser;
 import leigh.ai.game.feb.service.map.MapPath;
 import leigh.ai.game.feb.service.map.Traffic;
 import leigh.ai.game.feb.util.FakeSleepUtil;
@@ -59,15 +60,28 @@ public class MoveService {
 			HttpUtil.get("shopship.php");
 			HttpUtil.get("shopship_wi.php?shipto=" + code);
 			HttpUtil.get("shopship_updata.php?shipto=" + code);
-			HttpUtil.get("move.php?display=1");
+			PersonStatusParser.afterMove(HttpUtil.get("move.php?display=1"));
 			break;
 		case fly:
 			//TODO:
+			break;
+		case raid_exit:
+			HttpUtil.get("raid_exit.php");
+			PersonStatusParser.afterMove(HttpUtil.get("move.php?display=1"));
 			break;
 		}
 		PersonStatusService.currentLocation = code;
 	}
 	public static void moveTo(int target) {
 		movePath(MapService.findPath(PersonStatusService.currentLocation, target));
+	}
+	public static boolean enterTower() {
+		String npctell = HttpUtil.get("npc.php?npcid=221&act=Q0_9999B");
+		if(!npctell.contains("原来如此，那么你可以进入威鲁尼塔了")) {
+			return false;
+		}
+		HttpUtil.get("move.php?display=1");
+		
+		return true;
 	}
 }

@@ -89,4 +89,14 @@ public class PersonStatusParser {
 			PersonStatusService.items.add(t);
 		}
 	}
+
+	public static void afterMove(String str) {
+		try {
+			PersonStatusService.HP = Integer.parseInt(str.split("'j_hp','", 2)[1].split("'", 2)[0]);
+			PersonStatusService.maxHP = Integer.parseInt(str.split("'j_mhp','", 2)[1].split("'", 2)[0]);
+			PersonStatusService.AP = Integer.parseInt(str.split("'j_ap','", 2)[1].split("'", 2)[0]);
+		} catch(Exception e) {
+			ParserExceptionHandler.handle(e, str, "解析move.php结果失败！");
+		}
+	}
 }
