@@ -38,8 +38,8 @@ public class MapServiceTest {
 	}
 	@Test
 	public void testFindFacility() {
-//		Assert.assertEquals(MapService.findFacility(1145, new FacilityType[] {FacilityType.itemshop}).toString(),
-//				"1145:古拉德区域12(3) walk to 1141:古拉德区域13(2) walk to 1150:古拉德区域14(1) walk to 1152:古拉德城(0) ");
+		Assert.assertEquals(MapService.findFacility(1145, new FacilityType[] {FacilityType.itemshop}).toString(),
+				"1145:古拉德区域12(3) walk to 1141:古拉德区域13(2) walk to 1150:古拉德区域14(1) walk to 1152:古拉德城(0) ");
 		System.out.println(MapService.findFacility(1173, new FacilityType[] {FacilityType.itemshop}));
 	}
 }

@@ -1,0 +1,4 @@
+-1:empty,empty,enemy,empty,enemy,empty,chest,stopingEnemy,enemy,empty,empty,enemy,empty,stopingEnemy
+-2:empty,enemy,enemy,enemy,empty,chest,stopingEnemy,enemy,enemy,chest,empty,enemy,chest,enemy,stopingNpc,empty,chest,stopingEnemy,empty,stopingEnemy
+-3:enemy,enemy,chest,enemy,door,chest,stopingNpc,empty,empty,chest,enemy,enemy,stopingEnemy
+-4:shop,chest,chest,chest,chest,door,empty,enemy,empty,enemy,empty,enemy,empty,enemy,empty,enemy,stopingNpc,door,empty,chest,stopingEnemy,stopingEnemy

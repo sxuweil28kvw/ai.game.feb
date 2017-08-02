@@ -2,7 +2,7 @@ package leigh.ai.game.feb.parsers;
 
 import java.util.ArrayList;
 
-import leigh.ai.game.feb.service.MyStatus.MyItem;
+import leigh.ai.game.feb.service.status.MyStatus.MyItem;
 import leigh.ai.game.feb.service.PersonStatusService;
 
 import org.jsoup.Jsoup;

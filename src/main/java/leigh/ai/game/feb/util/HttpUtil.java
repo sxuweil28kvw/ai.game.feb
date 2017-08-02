@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import leigh.ai.game.feb.service.LoginService;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -46,6 +48,15 @@ public class HttpUtil {
 				HttpGet get = new HttpGet(url);
 				response = HC.execute(get);
 				result = EntityUtils.toString(response.getEntity(), "utf8");
+				if(result.contains("让你的鼠标和键盘休息一下")) {
+					if(logger.isDebugEnabled()) {
+						logger.debug("遭遇让你的鼠标和键盘休息一下！");
+					}
+					LoginService.logout();
+					FakeSleepUtil.sleep(1, 2);
+					LoginService.login();
+					continue;
+				}
 				if(logger.isDebugEnabled()) {
 					logger.debug("url=" + url + ",,,,,,response=" + result);
 				}

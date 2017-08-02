@@ -1,9 +1,9 @@
 package leigh.ai.game.feb.service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,13 +20,86 @@ public class MapService {
 	public static Map<Integer, MapNode> map = new HashMap<Integer, MapNode>();
 	public static Map<String, Integer> nameLookup = new HashMap<String, Integer>();
 	static {
-		initMap(false);
+		initMap();
 	}
-	public static void initMap(boolean fly) {
+	public static void initMap() {
 		map.clear();
 		nameLookup.clear();
+		String[] maps = new String[] {
+				"data/map/majiweier.map",
+				"data/map/longzhimen.map",
+				"data/map/lijiya.map",
+				"data/map/aiteluliya.map",
+				"data/map/xifangsandao.map",
+				"data/map/beilun.map",
+				};
+		for(String map: maps) {
+			initMap(map);
+		}
+		for(Integer code: map.keySet()) {
+			nameLookup.put(map.get(code).getName(), code);
+		}
+		// 船运-旧大陆：
+		Set<MapNode> tagang = map.get(1161).getNeighbours(Traffic.ship);
+		tagang.add(map.get(1160));
+		tagang.add(map.get(1198));
+		tagang.add(map.get(1194));
+		Set<MapNode> beisilong = map.get(1160).getNeighbours(Traffic.ship);
+		beisilong.add(map.get(1161));
+		beisilong.add(map.get(1198));
+		beisilong.add(map.get(1194));
+		Set<MapNode> jilisi = map.get(1198).getNeighbours(Traffic.ship);
+		jilisi.add(map.get(1161));
+		jilisi.add(map.get(1160));
+		jilisi.add(map.get(1194));
+		Set<MapNode> mlkn = map.get(1194).getNeighbours(Traffic.ship);
+		mlkn.add(map.get(1161));
+		mlkn.add(map.get(1160));
+		mlkn.add(map.get(1198));
+		
+		// 船运-萨拉丁海岸和港镇巴顿
+		map.get(2004).getNeighbours(Traffic.ship).add(map.get(2003));
+		map.get(2003).getNeighbours(Traffic.ship).add(map.get(2004));
+		// 船运-迷雾岛和珍珠港
+		map.get(2094).getNeighbours(Traffic.ship).add(map.get(2049));
+		map.get(2049).getNeighbours(Traffic.ship).add(map.get(2094));
+		// 跳裂缝：
+		map.get(1188).getNeighbours(Traffic.crack).add(map.get(2001));
+		map.get(2001).getNeighbours(Traffic.crack).add(map.get(1188));
+		// 过境：
+		map.get(2033).getNeighbours(Traffic.border).add(map.get(2034));//黑克境
+		map.get(2034).getNeighbours(Traffic.border).add(map.get(2033));//黑克境
+		map.get(2060).getNeighbours(Traffic.border).add(map.get(2016));//乌兰境
+		map.get(2016).getNeighbours(Traffic.border).add(map.get(2060));//乌兰境
+		// 飞行
+		int[] airports = new int[] {
+				1152, 1137, 1128, 1123, 1122, 1119, 1149, 1113, 1204,
+				1156, 1142, 1102, 1107, 1183, 1179, 
+		};
+		for(int i = 0; i < airports.length; i++) {
+			for(int j = 0; j < airports.length; j++) {
+				if(j == i) {
+					continue;
+				}
+				map.get(airports[i]).getNeighbours(Traffic.fly).add(map.get(airports[j]));
+			}
+		}
+		// 副本
+		map.get(-1).getNeighbours(Traffic.raid_exit).add(map.get(1114));
+		map.get(-2).getNeighbours(Traffic.raid_exit).add(map.get(1114));
+		map.get(-3).getNeighbours(Traffic.raid_exit).add(map.get(1114));
+		map.get(-4).getNeighbours(Traffic.raid_exit).add(map.get(1114));
+		map.get(-5).getNeighbours(Traffic.raid_exit).add(map.get(1114));
+		map.get(-6).getNeighbours(Traffic.raid_exit).add(map.get(1114));
+		map.get(-7).getNeighbours(Traffic.raid_exit).add(map.get(1114));
+		map.get(-8).getNeighbours(Traffic.raid_exit).add(map.get(1114));
+		map.get(-9).getNeighbours(Traffic.raid_exit).add(map.get(1184));
+	}
+	
+	private static void initMap(String filePath) {
+		BufferedReader br = null;
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(MapService.class.getClassLoader().getResourceAsStream("data/map/majiweier.map"), "utf8"));
+			br = new BufferedReader(new InputStreamReader(MapService.class.getClassLoader().getResourceAsStream(filePath), "utf8"));
 			String line = br.readLine();
 			while(line != null && !line.equals("")) {
 				String[] array = line.split(",");
@@ -54,44 +127,17 @@ public class MapService {
 				map.put(code, node);
 				line = br.readLine();
 			}
-			br.close();
 		} catch(Exception e) {
 			e.printStackTrace();
+		} finally {
+			if(br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		for(Integer code: map.keySet()) {
-			nameLookup.put(map.get(code).getName(), code);
-		}
-		// 船运
-		Set<MapNode> tagang = map.get(1161).getNeighbours(Traffic.ship);
-		tagang.add(map.get(1160));
-		tagang.add(map.get(1198));
-		tagang.add(map.get(1194));
-		
-		Set<MapNode> beisilong = map.get(1160).getNeighbours(Traffic.ship);
-		beisilong.add(map.get(1161));
-		beisilong.add(map.get(1198));
-		beisilong.add(map.get(1194));
-		
-		Set<MapNode> jilisi = map.get(1198).getNeighbours(Traffic.ship);
-		jilisi.add(map.get(1161));
-		jilisi.add(map.get(1160));
-		jilisi.add(map.get(1194));
-		
-		Set<MapNode> mlkn = map.get(1194).getNeighbours(Traffic.ship);
-		mlkn.add(map.get(1161));
-		mlkn.add(map.get(1160));
-		mlkn.add(map.get(1198));
-		//副本
-		Set<MapNode> tower = map.get(1114).getNeighbours(Traffic.raid_exit);
-		tower.add(map.get(-1));
-		tower.add(map.get(-2));
-		tower.add(map.get(-3));
-		tower.add(map.get(-4));
-		tower.add(map.get(-5));
-		tower.add(map.get(-6));
-		tower.add(map.get(-7));
-		tower.add(map.get(-8));
-		map.get(1184).getNeighbours(Traffic.raid_exit).add(map.get(-9));
 	}
 	/*
 	public static void printMap() {
@@ -131,6 +177,7 @@ public class MapService {
 		endPath.put(targetCode, targetPath);
 		
 		for(int pathlen = 1; ; pathlen++) {
+			logger.debug("pathlen++: " + pathlen);
 			MapPath path = expandPath(startPath, pathlen, endPath);
 			if(path != null) {
 				if(logger.isDebugEnabled()) {
@@ -160,6 +207,10 @@ public class MapService {
 	}
 	private static MapPath expandByTraffic(Map<Integer, MapPath> path,
 			int targetLength, Map<Integer, MapPath> otherPath, Traffic traffic) {
+		if(traffic.equals(Traffic.fly) && !JobService.canFly()) {
+			return null;
+		}
+		
 		Map<Integer, MapPath> newPaths = new HashMap<Integer, MapPath>();
 		for(Integer key: path.keySet()) {
 			if(path.get(key).getPathLength() != targetLength - 1) {
@@ -241,6 +292,30 @@ public class MapService {
 		}
 		return nextnext;
 	}
+	
+	public static MapPath findFacilityExceptTraffics(int location, FacilityType[] facilityTypes, Traffic... traffics) {
+		for(FacilityType type: facilityTypes) {
+			if(FacilityService.hasFacility(location, type)) {
+				return null;
+			}
+		}
+		MapPath start = new MapPath();
+		start.setCode(location);
+		start.setPathLength(0);
+		Map<Integer, MapPath> paths = new HashMap<Integer, MapPath>();
+		paths.put(location, start);
+		int i = 1;
+		MapPath result = findFacilityByStep(facilityTypes, i, paths, traffics);
+		while(result == null) {
+			i++;
+			if(i > 30) {
+				logger.error("寻找设施失败！startLocation=" + location + ",设施=" + facilityTypes[0]);
+				return null;
+			}
+			result = findFacilityByStep(facilityTypes, i, paths, traffics);
+		}
+		return result;
+	}
 	public static MapPath findFacility(int location, FacilityType[] facilityTypes) {
 		for(FacilityType type: facilityTypes) {
 			if(FacilityService.hasFacility(location, type)) {
@@ -256,24 +331,38 @@ public class MapService {
 		MapPath result = findFacilityByStep(facilityTypes, i, paths);
 		while(result == null) {
 			i++;
+			if(i > 30) {
+				logger.error("寻找设施失败！startLocation=" + location + ",设施=" + facilityTypes[0]);
+				return null;
+			}
 			result = findFacilityByStep(facilityTypes, i, paths);
 		}
 		return result;
 	}
 	private static MapPath findFacilityByStep(FacilityType[] facilityTypes,
-			int step, Map<Integer, MapPath> paths) {
+			int step, Map<Integer, MapPath> paths, Traffic... exceptTraffics) {
 		Map<Integer, MapPath> newPaths = new HashMap<Integer, MapPath>();
 		for(Integer code: paths.keySet()) {
 			MapPath path = paths.get(code);
 			if(path.getPathLength() != step - 1) {
 				continue;
 			}
-			MapPath result = findFacilityByTraffic(facilityTypes, step, paths, newPaths, code, Traffic.walk);
-			if(result == null) {
-				result = findFacilityByTraffic(facilityTypes, step, paths, newPaths, code, Traffic.ship);
-			}
-			if(result != null) {
-				return result;
+			for1:
+			for(Traffic t: Traffic.values()) {
+				if(exceptTraffics != null) {
+					for(Traffic except: exceptTraffics) {
+						if(t.equals(except)) {
+							continue for1;
+						}
+					}
+				}
+				if(t.equals(Traffic.fly) && !JobService.canFly()) {
+					continue;
+				}
+				MapPath result = findFacilityByTraffic(facilityTypes, step, paths, newPaths, code, t);
+				if(result != null) {
+					return result;
+				}
 			}
 		}
 		paths.putAll(newPaths);

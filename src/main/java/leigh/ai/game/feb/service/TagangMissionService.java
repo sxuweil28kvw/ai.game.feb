@@ -20,6 +20,7 @@ public class TagangMissionService {
 	public static int mojiangLocation;
 	public static MissionStatus mowuMissionStatus;
 	public static MissionStatus mojiangMissionStatus;
+	public static String bananaMissionStatus = "";
 	public static void takeMission() {
 		checkMission();
 		if(mowuMissionStatus.equals(MissionStatus.cooldown) && mojiangMissionStatus.equals(MissionStatus.cooldown)) {
@@ -118,7 +119,39 @@ public class TagangMissionService {
 		} else {
 			mojiangMissionStatus = MissionStatus.cooldown;
 		}
+		try {
+			Element bananaTd = table.child(0).child(4).child(0);
+			if(bananaTd.html().contains("分钟后可以")) {
+				bananaMissionStatus = "已完成香蕉任务";
+			} else if(bananaTd.html().contains("已超时")) {
+				bananaMissionStatus = "未接";
+			} else if(bananaTd.html().contains("已经可以再")) {
+				bananaMissionStatus = "未接";
+			} else {
+				String bananaItem = bananaTd.child(0).child(0).child(0).child(1).child(0).child(0).child(0).child(1).html();
+				String bananaText = bananaTd.textNodes().get(bananaTd.textNodes().size() - 1).text();
+				bananaMissionStatus = bananaItem + bananaText;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("解析香蕉任务失败。");
+			System.out.println(table.toString());
+		}
 	}
+	public static void doOnlyMowu() {
+		takeMission();
+		if(!mowuMissionStatus.equals(MissionStatus.taken)) {
+			MoveService.movePath(MapService.findPath(PersonStatusService.currentLocation, 1161), BattleConfig.never);
+			handInMission();
+			return;
+		}
+		BattleService.readyForBattle();
+		MoveService.moveTo(mowuLocation);
+		fightMowuOrMojiang(mowuLocation);
+		MoveService.moveTo(1161);
+		handInMission();
+	}
+	
 	public static void doMissions() {
 		takeMission();
 		if(!mowuMissionStatus.equals(MissionStatus.taken) && !mojiangMissionStatus.equals(MissionStatus.taken)) {
@@ -168,6 +201,7 @@ public class TagangMissionService {
 		HttpUtil.get("npc.php?npcid=303B&act=mist");
 		checkMission();
 		FacilityService.saveMoney();
+		FacilityService.storeFullShards("魔石的碎片", 5);
 //		FacilityService.repairWeapon(0);
 	}
 }

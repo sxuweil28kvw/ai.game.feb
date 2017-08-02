@@ -1,5 +1,6 @@
 package leigh.ai.game.feb.parsers;
 
+import leigh.ai.game.feb.service.LoginService;
 import leigh.ai.game.feb.service.PersonStatusService;
 import leigh.ai.game.feb.service.battle.BattleInfo;
 import leigh.ai.game.feb.service.battle.BattleResult;
@@ -34,6 +35,10 @@ public class BattleResultParser {
 			Element lvup = doc.getElementById("battle_lvup");
 			if(!lvup.attr("style").contains("display:none")) {
 				// 升级了！
+				PersonStatusService.level = Byte.parseByte(lvup.child(0).child(0).child(0).child(0).child(0).child(0).child(0).child(0).child(0).child(1).child(3).child(0).html());
+				if(logger.isDebugEnabled()) {
+					logger.debug(LoginService.username + "升到了" + PersonStatusService.level + "级。");
+				}
 				PersonStatusService.maxHP = Integer.parseInt(lvup.child(0).child(0).child(0).child(0).child(0).child(1).child(0).child(0).child(0).child(0).child(1).child(0).html());
 			}
 			if(logger.isDebugEnabled()) {
@@ -45,6 +50,7 @@ public class BattleResultParser {
 			String[] otherInfo = new String[splByGoldenFont.length - 1];
 			for(int i = 1; i < splByGoldenFont.length; i++) {
 				otherInfo[i - 1] = splByGoldenFont[i].split("</font>")[0];
+				logger.debug(otherInfo[i - 1]);
 			}
 			result.setOtherInfo(otherInfo);
 			return result;

@@ -12,5 +12,8 @@ public class ParserExceptionHandler {
 		System.out.println(msg);
 		System.exit(1);
 	}
-
+	public static void warn(Exception e, String source, String msg) {
+		LogUtil.errorStackTrace(logger, new Exception(msg + source, e));
+		System.out.println(msg);
+	}
 }

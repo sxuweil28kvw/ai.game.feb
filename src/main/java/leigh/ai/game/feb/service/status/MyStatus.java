@@ -1,4 +1,4 @@
-package leigh.ai.game.feb.service;
+package leigh.ai.game.feb.service.status;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +7,13 @@ public class MyStatus {
 	public static class MyWeapon {
 		private String name;
 		private int amountLeft;
-		private int amountTotal;
+		private String position;
+		public String getPosition() {
+			return position;
+		}
+		public void setPosition(String position) {
+			this.position = position;
+		}
 		public String getName() {
 			return name;
 		}
@@ -20,12 +26,6 @@ public class MyStatus {
 		public void setAmountLeft(int amountLeft) {
 			this.amountLeft = amountLeft;
 		}
-		public int getAmountTotal() {
-			return amountTotal;
-		}
-		public void setAmountTotal(int amountTotal) {
-			this.amountTotal = amountTotal;
-		}
 	}
 	public static class MyItem {
 		public static final Map<String, String> lookup = new HashMap<String, String>();
@@ -33,6 +33,7 @@ public class MyStatus {
 			lookup.put("aaaa", "伤药");
 			lookup.put("aaab", "万灵药");
 			lookup.put("aaac", "圣水");
+			lookup.put("aaaf", "铁丝");
 			lookup.put("aaag", "伤药");
 			lookup.put("aaah", "万灵药");
 			lookup.put("aaai", "圣水");

@@ -1,0 +1,667 @@
+package leigh.ai.game.feb.business;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import leigh.ai.game.feb.service.BagService;
+import leigh.ai.game.feb.service.BattleService;
+import leigh.ai.game.feb.service.FacilityService;
+import leigh.ai.game.feb.service.FacilityService.FacilityType;
+import leigh.ai.game.feb.service.LoginService;
+import leigh.ai.game.feb.service.MoveService;
+import leigh.ai.game.feb.service.PersonStatusService;
+import leigh.ai.game.feb.service.RaidService;
+import leigh.ai.game.feb.service.battle.BattleInfo;
+import leigh.ai.game.feb.service.battle.BattleResult;
+import leigh.ai.game.feb.service.status.MyStatus.MyItem;
+import leigh.ai.game.feb.service.status.MyStatus.MyWeapon;
+import leigh.ai.game.feb.util.FakeSleepUtil;
+import leigh.ai.game.feb.util.HttpUtil;
+import leigh.ai.game.feb.util.UnicodeReader;
+
+public class RaidBiz {
+
+	public static void guya(String[] args) {
+		String u = "飞飞企鹅";
+		String p = "kk82liewuxux";
+		if(args.length > 0) {
+			u = args[0];
+			p = args[1];
+		}
+		LoginService.login(u, p);
+		if(PersonStatusService.bagFree < 10) {
+			System.out.println("资源快满了！");
+			System.exit(0);
+		}
+		RaidService.readyForGuya();
+		MoveService.moveTo(1114);
+		while(true) {
+			if(!MoveService.enterTower()) {
+				System.err.println("进塔错误：没有队伍、或队伍已经有一个塔进度、或没完成进塔任务。");
+				System.exit(1);
+			}
+			RaidService.move();
+			w:
+			while(RaidService.myPosition <= 11) {
+				switch(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)) {
+				case enemy:
+				case stopingEnemy:
+					if(!RaidService.selfHeal()) {
+						break w;
+					}
+					if(PersonStatusService.AP < 10) {
+						if(!RaidService.addAp()) {
+							break w;
+						}
+					}
+					HttpUtil.get("pve.php");
+					BattleInfo battleInfo = RaidService.battle(5);
+					while(!battleInfo.getResult().equals(BattleResult.win)) {
+						PersonStatusService.update();
+						if(PersonStatusService.weapons.get(0).getAmountLeft() == 0) {
+							break w;
+						}
+						if(!RaidService.selfHeal()) {
+							break w;
+						}
+						if(PersonStatusService.AP < 10) {
+							if(!RaidService.addAp()) {
+								break w;
+							}
+						}
+						HttpUtil.get("pve.php");
+						battleInfo = RaidService.battle(5);
+					}
+					PersonStatusService.update();
+					if(PersonStatusService.weapons.get(0).getAmountLeft() == 0) {
+						break w;
+					}
+					if(!RaidService.selfHeal()) {
+						break w;
+					}
+					if(PersonStatusService.AP < 10) {
+						if(!RaidService.addAp()) {
+							break w;
+						}
+					}
+				default:
+					break;
+				}
+				RaidService.move();
+			}
+			RaidService.exit();
+			BagService.update();
+			if(PersonStatusService.bagFree < 10) {
+				System.out.println("资源快满了！");
+				System.exit(0);
+			}
+			RaidService.readyForGuya();
+		}
+	}
+	
+	public static void longpi(String[] args) {
+		String u1 = args[0];
+		String p1 = args[1];
+		String u2 = args[2];
+		String p2 = args[3];
+		LoginService.login(u1, p1);
+		if(PersonStatusService.currentLocation < 0) {
+			RaidService.exit();
+		}
+		LoginService.logout();
+		System.out.println(u2 + "进塔卡进度");
+		LoginService.login(u2, p2);
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+		LoginService.logout();
+		LoginService.username = u1;
+		LoginService.password = p1;
+		LoginService.login();
+		/*
+		for(int i = 0; i < PersonStatusService.weapons.size(); i++) {
+			MyWeapon w = PersonStatusService.weapons.get(i);
+			if(w.getName().equals("勇者之剑")) {
+				if(w.getAmountLeft() < WeaponType.勇者之剑.getQuantity()) {
+					FacilityService.repairWeapon(w);
+				}
+				continue;
+			}
+			WeaponType wt = WeaponType.valueOf(w.getName());
+			if(wt == null) {
+				if(!FacilityService.saveWeaponToBank(w)) {
+					System.out.println("身上携带有不明武器，不知如何处理！");
+				}
+				i--;
+				continue;
+			} else if(wt.getLevel().charAt(0) < 'B') {
+				FacilityService.sellWeapon(w);
+				i--;
+				continue;
+			}
+		}
+		if(PersonStatusService.weapons.size() < 5) {
+			MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[] {FacilityType.weaponshopB}));
+			for(int i = PersonStatusService.weapons.size(); i < 5; i++) {
+				FacilityService.buyWeapon("1232");
+			}
+		}
+		*/
+		BattleService.selfHeal(true);
+		ensureTiesi();
+		ensureHolywater();
+		ensureMedicine();
+		
+		if(PersonStatusService.bagFree < 20) {
+			System.out.println("资源快满了！");
+			System.exit(0);
+		}
+		while(true) {
+			MoveService.moveTo(1114);
+			MoveService.enterTower();
+			
+			RaidService.move();
+			boolean pause = false;
+			w:
+			while(PersonStatusService.currentLocation != -4) {
+				switch(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)) {
+				case enemy:
+				case stopingEnemy:
+					if(RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation) &&
+							RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+						break;
+					}
+					HttpUtil.get("pve.php");
+					int battleTurns = 5;
+					if(PersonStatusService.currentLocation == -2 && RaidService.myPosition == 17) {
+						battleTurns = 3;
+					}
+					BattleInfo battleInfo = RaidService.battle(battleTurns);
+					while(!battleInfo.getResult().equals(BattleResult.win)) {
+						if(!ensureWeapon()) {
+							pause = true;
+							break w;
+						}
+						if(battleInfo.getResult().equals(BattleResult.lose)) {
+							if(!RaidService.selfHeal()) {
+								pause = true;
+								break w;
+							}
+						} else if(PersonStatusService.HP < 10) {
+							if(!RaidService.selfHeal()) {
+								pause = true;
+								break w;
+							}
+						}
+						if(PersonStatusService.AP < 10) {
+							if(!RaidService.addAp()) {
+								pause = true;
+								break w;
+							}
+						}
+						HttpUtil.get("pve.php");
+						battleInfo = RaidService.battle(battleTurns);
+						FakeSleepUtil.sleep(1, 2);
+					}
+					if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
+						Set<Integer> value = new HashSet<Integer>();
+						value.add(RaidService.myPosition);
+						RaidService.deadEnemies.put(PersonStatusService.currentLocation, value);
+					} else {
+						RaidService.deadEnemies.get(PersonStatusService.currentLocation).add(RaidService.myPosition);
+					}
+					if(!ensureWeapon()) {
+						pause = true;
+						break w;
+					}
+					if(PersonStatusService.HP < 10 && !RaidService.selfHeal()) {
+						pause = true;
+						break w;
+					}
+					if(PersonStatusService.AP < 10) {
+						if(!RaidService.addAp()) {
+							pause = true;
+							break w;
+						}
+					}
+					
+					break;
+				case door:
+					if(RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+						break;
+					}
+					RaidService.openDoor();
+					break;
+				default:
+					break;
+				}
+				RaidService.move();
+			}
+			if(!pause) {
+				for(int i = 0; i < 4; i++) {
+					RaidService.move();
+					RaidService.openChest(PersonStatusService.userId, u1);
+				}
+				RaidService.exit();
+				LoginService.logout();
+				System.out.println(u2 + "重新进塔卡进度");
+				LoginService.login(u2, p2);
+				RaidService.exit();
+				MoveService.enterTower();
+				LoginService.logout();
+				LoginService.login(u1, p1);
+				RaidService.deadEnemies.clear();
+			} else {
+				RaidService.exit();
+			}
+			if(PersonStatusService.bagFree < 20) {
+				System.out.println("资源快满了！");
+				System.exit(0);
+			}
+			prepare();
+		}
+	}
+
+	public static void moyan(String[] args) {
+		String u1 = args[0];
+		String p1 = args[1];
+		String u2 = args[2];
+		String p2 = args[3];
+		LoginService.login(u1, p1);
+		if(PersonStatusService.currentLocation < 0) {
+			RaidService.exit();
+		}
+		LoginService.logout();
+		System.out.println(u2 + "进塔卡进度");
+		LoginService.login(u2, p2);
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+		LoginService.logout();
+		LoginService.username = u1;
+		LoginService.password = p1;
+		LoginService.login();
+		BattleService.selfHeal(true);
+		ensureTiesi();
+		ensureHolywater();
+		ensureMedicine();
+		
+		if(PersonStatusService.bagFree < 20) {
+			System.out.println("资源快满了！");
+			System.exit(0);
+		}
+		while(true) {
+			MoveService.moveTo(1114);
+			MoveService.enterTower();
+			
+			RaidService.move();
+			boolean pause = false;
+			w:
+			while(PersonStatusService.currentLocation != -3) {
+				switch(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)) {
+				case enemy:
+				case stopingEnemy:
+					if(RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation) &&
+							RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+						break;
+					}
+					HttpUtil.get("pve.php");
+					int battleTurns = 5;
+					if(PersonStatusService.currentLocation == -2 && RaidService.myPosition == 17) {
+						battleTurns = 3;
+					}
+					BattleInfo battleInfo = RaidService.battle(battleTurns);
+					while(!battleInfo.getResult().equals(BattleResult.win)) {
+						if(!ensureWeapon()) {
+							pause = true;
+							break w;
+						}
+						if(battleInfo.getResult().equals(BattleResult.lose)) {
+							if(!RaidService.selfHeal()) {
+								pause = true;
+								break w;
+							}
+						} else if(PersonStatusService.HP < 10) {
+							if(!RaidService.selfHeal()) {
+								pause = true;
+								break w;
+							}
+						}
+						if(PersonStatusService.AP < 10) {
+							if(!RaidService.addAp()) {
+								pause = true;
+								break w;
+							}
+						}
+						HttpUtil.get("pve.php");
+						battleInfo = RaidService.battle(battleTurns);
+						FakeSleepUtil.sleep(1, 2);
+					}
+					if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
+						Set<Integer> value = new HashSet<Integer>();
+						value.add(RaidService.myPosition);
+						RaidService.deadEnemies.put(PersonStatusService.currentLocation, value);
+					} else {
+						RaidService.deadEnemies.get(PersonStatusService.currentLocation).add(RaidService.myPosition);
+					}
+					if(!ensureWeapon()) {
+						pause = true;
+						break w;
+					}
+					if(PersonStatusService.HP < 10 && !RaidService.selfHeal()) {
+						pause = true;
+						break w;
+					}
+					if(PersonStatusService.AP < 10) {
+						if(!RaidService.addAp()) {
+							pause = true;
+							break w;
+						}
+					}
+					
+					break;
+				case door:
+					if(RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+						break;
+					}
+					RaidService.openDoor();
+					break;
+				default:
+					break;
+				}
+				RaidService.move();
+			}
+			if(!pause) {
+				BattleInfo battleInfo = RaidService.battle(5);
+				while(!battleInfo.getResult().equals(BattleResult.win)) {
+					if(!ensureWeapon()) {
+						pause = true;
+					}
+					if(battleInfo.getResult().equals(BattleResult.lose)) {
+						if(!RaidService.selfHeal()) {
+							pause = true;
+						}
+					} else if(PersonStatusService.HP < 10) {
+						if(!RaidService.selfHeal()) {
+							pause = true;
+						}
+					}
+					if(PersonStatusService.AP < 10) {
+						if(!RaidService.addAp()) {
+							pause = true;
+						}
+					}
+					HttpUtil.get("pve.php");
+					battleInfo = RaidService.battle(5);
+					FakeSleepUtil.sleep(1, 2);
+				}
+				RaidService.exit();
+				if(!pause) {
+					LoginService.logout();
+					System.out.println(u2 + "重新进塔卡进度");
+					LoginService.login(u2, p2);
+					RaidService.exit();
+					MoveService.enterTower();
+					LoginService.logout();
+					LoginService.login(u1, p1);
+					RaidService.deadEnemies.clear();
+				}
+			} else {
+				RaidService.exit();
+			}
+			if(PersonStatusService.bagFree < 20) {
+				System.out.println("资源快满了！");
+				System.exit(0);
+			}
+			prepare();
+		}
+	}
+	
+	public static void sida(String propertyFile) {
+		Properties prop = new Properties();
+		try {
+			BufferedReader br = new BufferedReader(new UnicodeReader(new FileInputStream(propertyFile), "utf8"));
+			String line = br.readLine();
+			while(line != null) {
+				if(line.trim().equals("") || line.startsWith("#")) {
+					continue;
+				}
+				String[] spl = line.split("=", 2);
+				prop.put(spl[0], spl[1]);
+				
+				line = br.readLine();
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String uAss = prop.getProperty("刺客");
+		String pAss = prop.getProperty("密码" + uAss);
+		String uVlk = prop.getProperty("圣女");
+		String pVlk = prop.getProperty("密码" + uVlk);
+		
+		LoginService.login(uAss, pAss);
+		if(PersonStatusService.currentLocation < 0) {
+			RaidService.exit();
+		}
+		LoginService.logout();
+		System.out.println(uVlk + "进塔卡进度");
+		LoginService.login(uVlk, pVlk);
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+		LoginService.logout();
+		
+		LoginService.login(uAss, pAss);
+		
+		BattleService.selfHeal(true);
+		ensureTiesi();
+		ensureHolywater();
+		ensureMedicine();
+		
+		if(PersonStatusService.bagFree < 15) {
+			System.out.println("刺客资源快满了！");
+			System.exit(0);
+		}
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+		
+		RaidService.move();
+		w:
+		while(PersonStatusService.currentLocation != -5) {
+			switch(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)) {
+			case enemy:
+			case stopingEnemy:
+				if(RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation) &&
+						RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+					break;
+				}
+				HttpUtil.get("pve.php");
+				int battleTurns = RaidService.determinTurns();
+				
+				BattleInfo battleInfo = RaidService.battle(battleTurns);
+				while(!battleInfo.getResult().equals(BattleResult.win)) {
+					if(!ensureWeapon()) {
+						reEnterTower();
+						continue w;
+					}
+					if(battleInfo.getResult().equals(BattleResult.lose)) {
+						if(!RaidService.selfHeal()) {
+							reEnterTower();
+							continue w;
+						}
+					} else if(PersonStatusService.HP < 10) {
+						if(!RaidService.selfHeal()) {
+							reEnterTower();
+							continue w;
+						}
+					}
+					if(PersonStatusService.AP < 10) {
+						if(!RaidService.addAp()) {
+							reEnterTower();
+							continue w;
+						}
+					}
+					HttpUtil.get("pve.php");
+					battleInfo = RaidService.battle(battleTurns);
+					FakeSleepUtil.sleep(1, 2);
+				}
+				if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
+					Set<Integer> value = new HashSet<Integer>();
+					value.add(RaidService.myPosition);
+					RaidService.deadEnemies.put(PersonStatusService.currentLocation, value);
+				} else {
+					RaidService.deadEnemies.get(PersonStatusService.currentLocation).add(RaidService.myPosition);
+				}
+				if(!ensureWeapon()) {
+					reEnterTower();
+					continue w;
+				}
+				if(PersonStatusService.HP < 10 && !RaidService.selfHeal()) {
+					reEnterTower();
+					continue w;
+				}
+				if(PersonStatusService.AP < 10) {
+					if(!RaidService.addAp()) {
+						reEnterTower();
+						continue w;
+					}
+				}
+				
+				break;
+			case door:
+				if(RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+					break;
+				}
+				RaidService.openDoor();
+				break;
+			case shop:
+				RaidService.repairAllWeapons();
+			default:
+				break;
+			}
+			RaidService.move();
+		}
+		RaidService.ta5();
+		LoginService.logout();
+		
+		LoginService.login(uVlk, pVlk);
+		RaidService.exit();
+		
+	}
+	
+	private static void reEnterTower() {
+		RaidService.exit();
+		prepare();
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+	}
+
+	private static void ensureMedicine() {
+		List<MyItem> medicines = new LinkedList<MyItem>();
+		for(MyItem t: PersonStatusService.items) {
+			if(t.getName().equals("万灵药")) {
+				medicines.add(t);
+			}
+		}
+		for(int i = 0; i < medicines.size(); i++) {
+			MyItem t = medicines.get(i);
+			if(t.getAmountLeft() < 15) {
+				FacilityService.sellItem(t);
+			}
+		}
+		medicines.clear();
+		for(MyItem t: PersonStatusService.items) {
+			if(t.getName().equals("万灵药")) {
+				medicines.add(t);
+			}
+		}
+		if(medicines.size() < 2) {
+			for(int i = medicines.size(); i < 2; i++) {
+				MoveService.moveToFacility(FacilityType.itemshopMember);
+				FacilityService.buyItem("aaah");
+			}
+		}
+	}
+
+	private static boolean ensureWeapon() {
+		PersonStatusService.update();
+		if(PersonStatusService.weapons.get(0).getAmountLeft() > 0) {
+			return true;
+		}
+		for(int i = 1; i < PersonStatusService.weapons.size(); i++) {
+			if(PersonStatusService.weapons.get(i).getAmountLeft() > 0) {
+				PersonStatusService.equipWeapon(PersonStatusService.weapons.get(i));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static void ensureHolywater() {
+		MyItem holywater = null;
+		for(MyItem t: PersonStatusService.items) {
+			if(t.getName().equals("圣水") || t.getName().equals("烧酒") || t.getName().equals("卡博雷酒")) {
+				holywater = t;
+				break;
+			}
+		}
+		if(holywater == null) {
+			MoveService.moveToFacility(FacilityType.itemshopMember);
+			FacilityService.buyItem("aaai");
+		} else if(holywater.getAmountLeft() < 5) {
+			FacilityService.sellItem(holywater);
+			MoveService.moveToFacility(FacilityType.itemshopMember);
+			FacilityService.buyItem("aaai");
+		}
+	}
+	
+	private static void ensureTiesi() {
+		MyItem tiesi = null;
+		for(MyItem t: PersonStatusService.items) {
+			if(t.getName().equals("铁丝")) {
+				tiesi = t;
+				break;
+			}
+		}
+		if(tiesi == null) {
+			MoveService.moveToFacility(FacilityType.itemshop);
+			FacilityService.buyItem("aaaf");
+			for(MyItem t: PersonStatusService.items) {
+				if(t.getName().equals("铁丝")) {
+					tiesi = t;
+					break;
+				}
+			}
+		}
+		if(!tiesi.getPosition().equals("E")) {
+			PersonStatusService.equipItem(tiesi);
+		}
+		if(tiesi.getAmountLeft() < 15) {
+			FacilityService.sellItem(tiesi);
+			MoveService.moveToFacility(FacilityType.itemshop);
+			FacilityService.buyItem("aaaf");
+		}
+	}
+
+	private static void prepare() {
+		for(MyWeapon w: PersonStatusService.weapons) {
+			FacilityService.repairWeapon(w);
+		}
+		BattleService.selfHeal(true);
+		BattleService.addAp(true);
+		ensureTiesi();
+		ensureHolywater();
+		ensureMedicine();
+	}
+
+	public static void ta5(String u, String p) {
+		LoginService.username = u;
+		LoginService.password = p;
+		LoginService.login();
+		RaidService.ta5();
+	}
+}
