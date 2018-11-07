@@ -71,7 +71,7 @@ public class LoginService {
 		HttpPost post = new HttpPost(HttpUtil.FEB_HOST + "register.php");
 		String registerPhp = null;
 		try {
-			post.addHeader("Referer", "http://120.132.72.13/febo/login.php");
+			post.addHeader("Referer", HttpUtil.FEB_HOST + "login.php");
 			CloseableHttpResponse response = HttpUtil.HC.execute(post);
 			registerPhp = EntityUtils.toString(response.getEntity(), "utf8");
 		} catch (Exception e1) {

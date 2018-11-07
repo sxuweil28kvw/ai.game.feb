@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpUtil {
-	public static String FEB_HOST = "http://120.132.72.13/febo/";
+	public static String FEB_HOST = "http://o.feb2.cn/";
 	public static CloseableHttpClient HC;
 	static {
 		RequestConfig rc = RequestConfig.custom()
