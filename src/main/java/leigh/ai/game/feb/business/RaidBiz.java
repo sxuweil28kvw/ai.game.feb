@@ -3,6 +3,7 @@ package leigh.ai.game.feb.business;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,12 +14,14 @@ import leigh.ai.game.feb.service.BagService;
 import leigh.ai.game.feb.service.BattleService;
 import leigh.ai.game.feb.service.FacilityService;
 import leigh.ai.game.feb.service.FacilityService.FacilityType;
+import leigh.ai.game.feb.service.JobService;
 import leigh.ai.game.feb.service.LoginService;
 import leigh.ai.game.feb.service.MoveService;
 import leigh.ai.game.feb.service.PersonStatusService;
 import leigh.ai.game.feb.service.RaidService;
 import leigh.ai.game.feb.service.battle.BattleInfo;
 import leigh.ai.game.feb.service.battle.BattleResult;
+import leigh.ai.game.feb.service.raid.RaidMapType;
 import leigh.ai.game.feb.service.status.MyStatus.MyItem;
 import leigh.ai.game.feb.service.status.MyStatus.MyWeapon;
 import leigh.ai.game.feb.util.FakeSleepUtil;
@@ -421,7 +424,7 @@ public class RaidBiz {
 		}
 	}
 	
-	public static void sida(String propertyFile) {
+	public static void ta6Once(String propertyFile) {
 		Properties prop = new Properties();
 		try {
 			BufferedReader br = new BufferedReader(new UnicodeReader(new FileInputStream(propertyFile), "utf8"));
@@ -438,6 +441,7 @@ public class RaidBiz {
 			br.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.exit(1);
 		}
 		String uAss = prop.getProperty("刺客");
 		String pAss = prop.getProperty("密码" + uAss);
@@ -451,24 +455,114 @@ public class RaidBiz {
 		LoginService.logout();
 		System.out.println(uVlk + "进塔卡进度");
 		LoginService.login(uVlk, pVlk);
+		
+		if(PersonStatusService.bagFree < 70) {
+			System.out.println("圣女资源快满了！");
+			LoginService.logout();
+			System.exit(0);
+		}
+		
+		ensureWeapon();
+		ensureStaff();
+		
 		MoveService.moveTo(1114);
 		MoveService.enterTower();
 		LoginService.logout();
 		
 		LoginService.login(uAss, pAss);
 		
+		if(PersonStatusService.bagFree < 15) {
+			System.out.println("刺客资源快满了！");
+			LoginService.logout();
+			System.exit(0);
+		}
 		BattleService.selfHeal(true);
 		ensureTiesi();
 		ensureHolywater();
 		ensureMedicine();
 		
-		if(PersonStatusService.bagFree < 15) {
-			System.out.println("刺客资源快满了！");
-			System.exit(0);
-		}
 		MoveService.moveTo(1114);
 		MoveService.enterTower();
 		
+		toTa5();
+		
+		RaidService.ta5();
+		BattleInfo battleInfo = RaidService.battle(5);
+		while(!battleInfo.getResult().equals(BattleResult.win)) {
+			if(!ensureWeapon()) {
+				reEnterTower();
+				toTa5();
+			}
+			if(PersonStatusService.AP < 10) {
+				if(!RaidService.addAp()) {
+					reEnterTower();
+					toTa5();
+				}
+			}
+			battleInfo = RaidService.battle(5);
+		}
+		LoginService.logout();
+		
+		LoginService.login(uVlk, pVlk);
+		toTa5();
+		w6:
+		while(RaidService.myPosition < 24) {
+			RaidService.move();
+			RaidMapType mapType = RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition);
+			if(mapType.equals(RaidMapType.enemy)) {
+				if(RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation) &&
+						RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+				} else {
+					battleInfo = RaidService.battle(5);
+					while(!battleInfo.getResult().equals(BattleResult.win)) {
+						if(!ensureWeapon()) {
+							reEnterTower();
+							toTa5();
+							continue w6;
+						}
+						if(battleInfo.getResult().equals(BattleResult.lose)) {
+							if(!RaidService.selfHeal()) {
+								reEnterTower();
+								toTa5();
+								continue w6;
+							}
+						} else if(PersonStatusService.HP < 35) {
+							if(!RaidService.selfHeal()) {
+								reEnterTower();
+								toTa5();
+								continue w6;
+							}
+						}
+						if(PersonStatusService.AP < 10) {
+							if(!RaidService.addAp()) {
+								reEnterTower();
+								toTa5();
+								continue w6;
+							}
+						}
+					}
+				}
+			}
+		}
+		LoginService.logout();
+		
+		LoginService.login(uAss, pAss);
+		RaidService.move();
+		while(RaidService.myPosition < 24) {
+			RaidService.move();
+			if(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)
+					.equals(RaidMapType.chest)) {
+				RaidService.openChest(PersonStatusService.userId, uAss);
+			}
+		}
+		RaidService.openChest(PersonStatusService.userId, uAss);
+	}
+	
+	/************
+	 * 打到塔5；
+	 * 必须先进塔。
+	 */
+	private static void toTa5() {
 		RaidService.move();
 		w:
 		while(PersonStatusService.currentLocation != -5) {
@@ -545,12 +639,6 @@ public class RaidBiz {
 			}
 			RaidService.move();
 		}
-		RaidService.ta5();
-		LoginService.logout();
-		
-		LoginService.login(uVlk, pVlk);
-		RaidService.exit();
-		
 	}
 	
 	private static void reEnterTower() {
@@ -587,6 +675,48 @@ public class RaidBiz {
 		}
 	}
 
+	private static boolean ensureStaff() {
+		PersonStatusService.update();
+		boolean atBank = false;
+		List<MyItem> cStaffs = new LinkedList<MyItem>();
+		for(MyItem item: PersonStatusService.items) {
+			if(!item.getName().equals("痊愈之杖")) {
+				if(!atBank) {
+					MoveService.moveToFacility(FacilityType.bank);
+					atBank= true;
+				}
+				if(!FacilityService.storeItem(item.getPosition())) {
+					return false;
+				}
+			} else {
+				cStaffs.add(item);
+			}
+		}
+		List<MyItem> staffsToSell = new ArrayList<MyItem>(cStaffs.size());
+		int sellMoney = 0;
+		for(MyItem staff: cStaffs) {
+			if(staff.getAmountLeft() < 14) {
+				staffsToSell.add(staff);
+				sellMoney += staff.getAmountLeft() * 75;
+			}
+		}
+		if(PersonStatusService.money < 8000) {
+			if(!atBank) {
+				MoveService.moveToFacility(FacilityType.bank);
+				atBank= true;
+			}
+			FacilityService.drawCash(19000 - sellMoney + 1125 * (5 - cStaffs.size() + staffsToSell.size()));
+		}
+		MoveService.moveToFacility(FacilityType.itemshop);
+		for(MyItem staff: staffsToSell) {
+			FacilityService.sellItem(staff);
+		}
+		for(int i = cStaffs.size() - staffsToSell.size(); i < 5; i++) {
+			FacilityService.buyItem("eaac");
+		}
+		return true;
+	}
+	
 	private static boolean ensureWeapon() {
 		PersonStatusService.update();
 		if(PersonStatusService.weapons.get(0).getAmountLeft() > 0) {
@@ -653,9 +783,13 @@ public class RaidBiz {
 		}
 		BattleService.selfHeal(true);
 		BattleService.addAp(true);
-		ensureTiesi();
-		ensureHolywater();
-		ensureMedicine();
+		if(PersonStatusService.myjob.equals("刺客") || PersonStatusService.myjob.equals("密探")) {
+			ensureTiesi();
+			ensureHolywater();
+			ensureMedicine();
+		} else if(JobService.canUseStaff()) {
+			ensureStaff();
+		}
 	}
 
 	public static void ta5(String u, String p) {

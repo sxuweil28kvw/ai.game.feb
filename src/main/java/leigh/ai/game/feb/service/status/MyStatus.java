@@ -38,6 +38,8 @@ public class MyStatus {
 			lookup.put("aaah", "万灵药");
 			lookup.put("aaai", "圣水");
 			lookup.put("eaaa", "回复之杖");
+			lookup.put("eaab", "治疗之杖");
+			lookup.put("eaac", "痊愈之杖");
 		}
 		private String position;
 		private String name;

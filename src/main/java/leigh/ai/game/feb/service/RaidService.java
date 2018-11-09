@@ -210,7 +210,7 @@ public class RaidService {
 	public static boolean addAp() {
 		for(int i = 0; i < PersonStatusService.items.size(); i++) {
 			MyItem t = PersonStatusService.items.get(i);
-			if(t.getName().equals("回复之杖") && JobService.canUseStaff()) {
+			if(t.getName().endsWith("之杖") && JobService.canUseStaff()) {
 				useStaff(t);
 				return true;
 			}
@@ -293,6 +293,10 @@ public class RaidService {
 	}
 	
 	public static void valkyrieTa6() {
+		
+	}
+	public static void battleTa5Turn5() {
+		BattleInfo battleInfo = RaidService.battle(5);
 		
 	}
 }

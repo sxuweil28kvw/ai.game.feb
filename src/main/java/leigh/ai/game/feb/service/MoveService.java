@@ -50,13 +50,15 @@ public class MoveService {
 		//TODO: 
 	}
 
-	public static void oneMove(Integer code, Traffic traffic) {
+	public static String oneMove(Integer code, Traffic traffic) {
+		String moveResult = null;
 		if(logger.isDebugEnabled()) {
 			logger.debug("moving to " + code + ":" + MapService.map.get(code).getName() + ", 交通方式：" + traffic);
 		}
 		switch(traffic) {
 		case walk:
-			MoveParser.parseMove(HttpUtil.get("move.php?mov=" + code));
+			moveResult = HttpUtil.get("move.php?mov=" + code);
+			MoveParser.parseMove(moveResult);
 			break;
 		case ship:
 			if(PersonStatusService.money < 200) {
@@ -67,7 +69,8 @@ public class MoveService {
 			HttpUtil.get("shopship.php");
 			HttpUtil.get("shopship_wi.php?shipto=" + code);
 			HttpUtil.get("shopship_updata.php?shipto=" + code);
-			PersonStatusParser.afterMove(HttpUtil.get("move.php?display=1"));
+			moveResult = HttpUtil.get("move.php?display=1");
+			PersonStatusParser.afterMove(moveResult);
 			break;
 		case fly:
 			if(PersonStatusService.AP < 25) {
@@ -76,7 +79,8 @@ public class MoveService {
 			}
 			HttpUtil.get("nwes_fly.php?goto=flya");
 			HttpUtil.get("nwes_fly.php?goto=flyb&flytype=&wrap=&maintext=" + code);
-			MoveParser.parseMove(HttpUtil.get("move.php"));
+			moveResult = HttpUtil.get("move.php");
+			MoveParser.parseMove(moveResult);
 			if(PersonStatusService.AP < 10) {
 				BattleService.addAp();
 			}
@@ -84,13 +88,15 @@ public class MoveService {
 			break;
 		case raid_exit:
 			HttpUtil.get("raid_exit.php");
-			PersonStatusParser.afterMove(HttpUtil.get("move.php?display=1"));
+			moveResult = HttpUtil.get("move.php?display=1");
+			PersonStatusParser.afterMove(moveResult);
 			break;
 		case border:
 			String npcid = "222";
 			HttpUtil.get("npc.php?npcid=" + npcid);
 			HttpUtil.get("npc.php?npcid=" + npcid + "&act=goto");
-			PersonStatusParser.afterMove(HttpUtil.get("move.php?display=1"));
+			moveResult = HttpUtil.get("move.php?display=1");
+			PersonStatusParser.afterMove(moveResult);
 			break;
 		case crack:
 			npcid = "102";
@@ -100,15 +106,18 @@ public class MoveService {
 			HttpUtil.get("npc.php?npcid=" + npcid);
 			HttpUtil.get("npc.php?npcid=" + npcid + "&act=crack");
 			HttpUtil.get("npc.php?npcid=" + npcid + "&act=crackok");
-			PersonStatusParser.afterMove(HttpUtil.get("move.php?display=1"));
+			moveResult = HttpUtil.get("move.php?display=1");
+			PersonStatusParser.afterMove(moveResult);
 			break;
 		default:
+			moveResult = "";
 			break;
 		}
 		if(PersonStatusService.currentLocation != code) {
 			logger.error("移动失败！");
 			System.exit(1);
 		}
+		return moveResult;
 	}
 	public static void moveTo(int target) {
 		movePath(MapService.findPath(PersonStatusService.currentLocation, target));

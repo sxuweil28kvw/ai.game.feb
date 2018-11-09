@@ -64,6 +64,8 @@ public class Assembled {
 			RaidBiz.moyan(args);
 		} else if(action.equals("ta5")) {
 			RaidBiz.ta5(args[0], args[1]);
+		} else if(action.equals("ta6once")) {
+			RaidBiz.ta6Once(args[0]);
 		} else if(action.equals("xiaohao")) {
 			AccountBiz.newAccount(args[0], args[1], args[2], args[3], args[4]);
 		} else if(action.equals("xiaohaobatch")) {
