@@ -484,19 +484,19 @@ public class RaidBiz {
 		MoveService.moveTo(1114);
 		MoveService.enterTower();
 		
-		toTa5();
+		toTa5(uAss);
 		
 		RaidService.ta5();
 		BattleInfo battleInfo = RaidService.battle(5);
 		while(!battleInfo.getResult().equals(BattleResult.win)) {
 			if(!ensureWeapon()) {
 				reEnterTower();
-				toTa5();
+				toTa5(uAss);
 			}
 			if(PersonStatusService.AP < 10) {
 				if(!RaidService.addAp()) {
 					reEnterTower();
-					toTa5();
+					toTa5(uAss);
 				}
 			}
 			battleInfo = RaidService.battle(5);
@@ -504,7 +504,7 @@ public class RaidBiz {
 		LoginService.logout();
 		
 		LoginService.login(uVlk, pVlk);
-		toTa5();
+		toTa5(uAss);
 		w6:
 		while(RaidService.myPosition < 24) {
 			RaidService.move();
@@ -517,26 +517,26 @@ public class RaidBiz {
 					while(!battleInfo.getResult().equals(BattleResult.win)) {
 						if(!ensureWeapon()) {
 							reEnterTower();
-							toTa5();
+							toTa5(uAss);
 							continue w6;
 						}
 						if(battleInfo.getResult().equals(BattleResult.lose)) {
 							if(!RaidService.selfHeal()) {
 								reEnterTower();
-								toTa5();
+								toTa5(uAss);
 								continue w6;
 							}
 						} else if(PersonStatusService.HP < 35) {
 							if(!RaidService.selfHeal()) {
 								reEnterTower();
-								toTa5();
+								toTa5(uAss);
 								continue w6;
 							}
 						}
 						if(PersonStatusService.AP < 10) {
 							if(!RaidService.addAp()) {
 								reEnterTower();
-								toTa5();
+								toTa5(uAss);
 								continue w6;
 							}
 						}
@@ -562,7 +562,7 @@ public class RaidBiz {
 	 * 打到塔5；
 	 * 必须先进塔。
 	 */
-	private static void toTa5() {
+	private static void toTa5(String userNameAssassin) {
 		RaidService.move();
 		w:
 		while(PersonStatusService.currentLocation != -5) {
@@ -627,13 +627,22 @@ public class RaidBiz {
 				
 				break;
 			case door:
-				if(RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+				if(RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation) &&
+						RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
 					break;
 				}
 				RaidService.openDoor();
 				break;
 			case shop:
 				RaidService.repairAllWeapons();
+				break;
+			case chest:
+				if(RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation) &&
+						RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
+					break;
+				}
+				RaidService.openChest(PersonStatusService.userId, userNameAssassin);
+				break;
 			default:
 				break;
 			}
