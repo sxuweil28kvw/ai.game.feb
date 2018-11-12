@@ -173,6 +173,7 @@ public class RaidService {
 		MoveService.moveTo(MapService.map.get(PersonStatusService.currentLocation).getNeighbours(Traffic.raid_exit).iterator().next().getCode());
 	}
 	public static boolean selfHeal() {
+		PersonStatusService.update();
 		int healHp = PersonStatusService.maxHP - PersonStatusService.HP;
 		if(healHp <= 0) {
 			return true;
@@ -180,7 +181,8 @@ public class RaidService {
 		boolean haveMedicine = false;
 		for(int i = 0; i < PersonStatusService.items.size(); i++) {
 			MyItem t = PersonStatusService.items.get(i);
-			if(t.getName().equals("回复之杖")) {
+			if(t.getName().equals("回复之杖") || t.getName().equals("治疗之杖")
+					|| t.getName().equals("痊愈之杖")) {
 				if(JobService.canUseStaff()) {
 					haveMedicine = true;
 					useStaff(t);
@@ -244,13 +246,7 @@ public class RaidService {
 		HttpUtil.get("raid_door.php");
 		HttpUtil.get("move.php?display=1");
 		logger.debug("开门");
-		if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
-			Set<Integer> value = new HashSet<Integer>();
-			value.add(RaidService.myPosition);
-			RaidService.deadEnemies.put(PersonStatusService.currentLocation, value);
-		} else {
-			RaidService.deadEnemies.get(PersonStatusService.currentLocation).add(RaidService.myPosition);
-		}
+		addDeadPosition();
 	}
 	public static void openChest(int userId, String username) {
 		String chestResponse = HttpUtil.get("raid_binn.php");
@@ -259,11 +255,22 @@ public class RaidService {
 			chestItem = chestResponse.split("发现了", 2)[1].split("<br>", 2)[0];
 		} catch(Exception e) {
 			ParserExceptionHandler.warn(e, chestResponse, "解析开宝箱失败！");
+			return;
 		}
 		HttpUtil.get("raid_binn.php?goto=getit&gid=" + userId);
 		HttpUtil.get("move.php?display=1");
 		if(logger.isInfoEnabled()) {
 			logger.info("宝箱开到" + chestItem + ", 分配给了" + username);
+		}
+		addDeadPosition();
+	}
+	public static void addDeadPosition() {
+		if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
+			Set<Integer> value = new HashSet<Integer>();
+			value.add(RaidService.myPosition);
+			RaidService.deadEnemies.put(PersonStatusService.currentLocation, value);
+		} else {
+			RaidService.deadEnemies.get(PersonStatusService.currentLocation).add(RaidService.myPosition);
 		}
 	}
 	public static int determinTurns() {

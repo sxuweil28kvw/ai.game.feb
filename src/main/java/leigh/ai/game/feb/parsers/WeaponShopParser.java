@@ -21,7 +21,7 @@ public class WeaponShopParser {
 		PersonStatusService.weapons.get(position).setAmountLeft(Integer.parseInt(s1.split("','", 2)[1].split("'", 2)[0]));
 	}
 	public static int parseRepairPrice(String str) {
-		if(str.contains("新的啊")) {
+		if(str.contains("新的")) {
 			return 0;
 		}
 		if(str.contains("没啥问题")) {

@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import leigh.ai.game.feb.service.BagService;
 import leigh.ai.game.feb.service.BattleService;
 import leigh.ai.game.feb.service.FacilityService;
@@ -29,6 +32,7 @@ import leigh.ai.game.feb.util.HttpUtil;
 import leigh.ai.game.feb.util.UnicodeReader;
 
 public class RaidBiz {
+	private static final Logger logger = LoggerFactory.getLogger(RaidBiz.class);
 
 	public static void guya(String[] args) {
 		String u = "飞飞企鹅";
@@ -462,8 +466,7 @@ public class RaidBiz {
 			System.exit(0);
 		}
 		
-		ensureWeapon();
-		ensureStaff();
+		prepare();
 		
 		MoveService.moveTo(1114);
 		MoveService.enterTower();
@@ -477,9 +480,8 @@ public class RaidBiz {
 			System.exit(0);
 		}
 		BattleService.selfHeal(true);
-		ensureTiesi();
-		ensureHolywater();
-		ensureMedicine();
+		prepare();
+		FacilityService.drawCash(20000);
 		
 		MoveService.moveTo(1114);
 		MoveService.enterTower();
@@ -501,53 +503,94 @@ public class RaidBiz {
 			}
 			battleInfo = RaidService.battle(5);
 		}
+		//上6楼
+		RaidService.move();
 		LoginService.logout();
 		
 		LoginService.login(uVlk, pVlk);
-		toTa5(uAss);
+		//坐电梯到5楼；圣女打前4楼的逻辑尚未实现
+		MoveService.enterTower(5);
 		w6:
-		while(RaidService.myPosition < 24) {
+		while(RaidService.myPosition < 23) {
 			RaidService.move();
 			RaidMapType mapType = RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition);
-			if(mapType.equals(RaidMapType.enemy)) {
+			if(mapType.equals(RaidMapType.enemy) || mapType.equals(RaidMapType.stopingEnemy)) {
 				if(RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation) &&
 						RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
 				} else {
 					battleInfo = RaidService.battle(5);
 					while(!battleInfo.getResult().equals(BattleResult.win)) {
 						if(!ensureWeapon()) {
-							reEnterTower();
-							toTa5(uAss);
+							RaidService.exit();
+							prepare();
+							MoveService.moveTo(1114);
+							MoveService.enterTower(5);
 							continue w6;
 						}
 						if(battleInfo.getResult().equals(BattleResult.lose)) {
 							if(!RaidService.selfHeal()) {
-								reEnterTower();
-								toTa5(uAss);
+								RaidService.exit();
+								prepare();
+								MoveService.moveTo(1114);
+								MoveService.enterTower(5);
 								continue w6;
 							}
 						} else if(PersonStatusService.HP < 35) {
 							if(!RaidService.selfHeal()) {
-								reEnterTower();
-								toTa5(uAss);
+								RaidService.exit();
+								prepare();
+								MoveService.moveTo(1114);
+								MoveService.enterTower(5);
 								continue w6;
 							}
 						}
 						if(PersonStatusService.AP < 10) {
 							if(!RaidService.addAp()) {
-								reEnterTower();
-								toTa5(uAss);
+								RaidService.exit();
+								prepare();
+								MoveService.moveTo(1114);
+								MoveService.enterTower(5);
 								continue w6;
 							}
+						}
+					}
+					RaidService.addDeadPosition();
+					
+					if(!ensureWeapon()) {
+						RaidService.exit();
+						prepare();
+						MoveService.moveTo(1114);
+						MoveService.enterTower(5);
+						continue w6;
+					}
+					
+					if(PersonStatusService.HP < 35) {
+						if(!RaidService.selfHeal()) {
+							RaidService.exit();
+							prepare();
+							MoveService.moveTo(1114);
+							MoveService.enterTower(5);
+							continue w6;
+						}
+					}
+					if(PersonStatusService.AP < 10) {
+						if(!RaidService.addAp()) {
+							RaidService.exit();
+							prepare();
+							MoveService.moveTo(1114);
+							MoveService.enterTower(5);
+							continue w6;
 						}
 					}
 				}
 			}
 		}
+		RaidService.exit();
 		LoginService.logout();
 		
 		LoginService.login(uAss, pAss);
-		RaidService.move();
+		// 此刻刺客在6楼第一格……目前登录时没有确定自己在副本中位置，挺坑的！
+		RaidService.myPosition = 0;
 		while(RaidService.myPosition < 24) {
 			RaidService.move();
 			if(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)
@@ -555,7 +598,9 @@ public class RaidBiz {
 				RaidService.openChest(PersonStatusService.userId, uAss);
 			}
 		}
-		RaidService.openChest(PersonStatusService.userId, uAss);
+		RaidService.exit();
+		LoginService.logout();
+		logger.info("塔6一次完毕！");
 	}
 	
 	/************
@@ -603,13 +648,7 @@ public class RaidBiz {
 					battleInfo = RaidService.battle(battleTurns);
 					FakeSleepUtil.sleep(1, 2);
 				}
-				if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
-					Set<Integer> value = new HashSet<Integer>();
-					value.add(RaidService.myPosition);
-					RaidService.deadEnemies.put(PersonStatusService.currentLocation, value);
-				} else {
-					RaidService.deadEnemies.get(PersonStatusService.currentLocation).add(RaidService.myPosition);
-				}
+				RaidService.addDeadPosition();
 				if(!ensureWeapon()) {
 					reEnterTower();
 					continue w;
@@ -637,6 +676,10 @@ public class RaidBiz {
 				RaidService.repairAllWeapons();
 				break;
 			case chest:
+				//不开前三层箱子……
+				if(PersonStatusService.currentLocation >= -3) {
+					break;
+				}
 				if(RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation) &&
 						RaidService.deadEnemies.get(PersonStatusService.currentLocation).contains(RaidService.myPosition)) {
 					break;
@@ -791,8 +834,8 @@ public class RaidBiz {
 			FacilityService.repairWeapon(w);
 		}
 		BattleService.selfHeal(true);
-		BattleService.addAp(true);
 		if(PersonStatusService.myjob.equals("刺客") || PersonStatusService.myjob.equals("密探")) {
+			BattleService.addAp(true);
 			ensureTiesi();
 			ensureHolywater();
 			ensureMedicine();

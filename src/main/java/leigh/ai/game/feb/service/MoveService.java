@@ -133,6 +133,24 @@ public class MoveService {
 		RaidService.myPosition = 0;
 		return true;
 	}
+	public static boolean enterTower(int floor) {
+		if(PersonStatusService.mahua < (floor - 1) * 3) {
+			logger.warn("身上只有{}麻花，不够坐电梯到{}层", PersonStatusService.mahua, floor);
+			return false;
+		}
+		MoveService.moveTo(1114);
+		String npctell = HttpUtil.get("npc.php?npcid=221");
+		if(!npctell.contains("Q0_9999C&mapid=" + (4000 + floor))) {
+			logger.warn("进塔出错：{}层的电梯未开", floor);
+			return false;
+		}
+		HttpUtil.get("npc.php?npcid=221&act=Q0_9999C&mapid=" + (4000 + floor));
+		HttpUtil.get("move.php?display=1");
+		PersonStatusService.currentLocation = -floor;
+		RaidService.myPosition = 0;
+		logger.info("应该进入了威鲁尼塔{}层", floor);
+		return true;
+	}
 	public static void moveToFacility(FacilityType... types) {
 		movePath(MapService.findFacility(PersonStatusService.currentLocation, types));
 	}
