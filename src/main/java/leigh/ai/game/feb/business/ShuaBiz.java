@@ -58,7 +58,8 @@ public class ShuaBiz {
 				if(info.getResult().equals(BattleResult.lose)) {
 					BattleService.selfHeal();
 				}
-				if(PersonStatusService.HP < PersonStatusService.maxHP * 0.4) {
+				double healPercent = JobService.canUseStaff() ? 0.7 : 0.4;
+				if(PersonStatusService.HP < PersonStatusService.maxHP * healPercent) {
 					BattleService.selfHeal();
 				}
 				if(PersonStatusService.AP < 10) {

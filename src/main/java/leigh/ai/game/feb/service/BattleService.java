@@ -116,11 +116,14 @@ public class BattleService {
 				useItem(t.getPosition());
 				logger.debug("使用物品" + t.getName());
 				break;
-			} else if(t.getName().equals("回复之杖")) {
+			} else if(t.getName().equals("回复之杖") || t.getName().equals("治疗之杖") || t.getName().equals("痊愈之杖")) {
 				if(JobService.canUseStaff()) {
 					haveMedicine = true;
 					useStaff(t);
 				}
+			}
+			if(PersonStatusService.maxHP - PersonStatusService.HP <= 0) {
+				return true;
 			}
 		}
 		if(!haveMedicine) {
@@ -141,7 +144,9 @@ public class BattleService {
 	public static void buyMedicine() {
 		if(JobService.canUseStaff()) {
 			MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[]{FacilityType.itemshop}));
-			FacilityService.buyItem("eaaa");
+			for(int i = 5 - PersonStatusService.items.size() - 1; i > 0; i--) {
+				FacilityService.buyItem("eaaa");
+			}
 		} else if(PersonStatusService.memberCard) {
 			MapPath pathMember = MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[] {FacilityType.itemshopMember});
 			MoveService.movePath(pathMember);

@@ -585,7 +585,6 @@ public class RaidBiz {
 				}
 			}
 		}
-		RaidService.exit();
 		LoginService.logout();
 		
 		LoginService.login(uAss, pAss);
@@ -598,7 +597,6 @@ public class RaidBiz {
 				RaidService.openChest(PersonStatusService.userId, uAss);
 			}
 		}
-		RaidService.exit();
 		LoginService.logout();
 		logger.info("塔6一次完毕！");
 	}
