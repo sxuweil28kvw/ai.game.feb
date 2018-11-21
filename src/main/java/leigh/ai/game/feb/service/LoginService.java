@@ -40,6 +40,7 @@ public class LoginService {
 		MainPhpParser.parse(mainPhp);
 		PersonStatusService.update();
 		BagService.update();
+		FakeSleepUtil.sleep(3, 4);
 	}
 	public static void login() {
 		login(username, password);

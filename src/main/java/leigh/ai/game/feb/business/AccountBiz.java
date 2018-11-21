@@ -49,8 +49,10 @@ public class AccountBiz {
 		}
 	}
 	public static void newAccount(String u, String p, String job, String abe, String answers) {
+		u = u.trim();
 		LoginService.deleteAccount(u, p);
 		LoginService.register(u, p, job, abe, answers);
+		FakeSleepUtil.sleep(5, 8);
 		PersonStatusService.level = 1;
 		LoginService.login(u, p);
 		HttpUtil.get("newbit.php");
