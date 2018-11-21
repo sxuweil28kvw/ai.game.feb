@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class FakeSleepUtil {
 	private static Logger logger = LoggerFactory.getLogger(FakeSleepUtil.class);
-	public static void sleep(int maxSeconds) {
+	public static void sleep(double maxSeconds) {
 		try {
 			int milli = (int)(Math.random() * 1000 * maxSeconds);
 			if(logger.isDebugEnabled()) {

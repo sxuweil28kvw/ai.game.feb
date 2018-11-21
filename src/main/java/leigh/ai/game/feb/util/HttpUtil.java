@@ -74,7 +74,7 @@ public class HttpUtil {
 			}
 			logger.warn("http连接出错！重试第" + i + "次");
 		}
-		FakeSleepUtil.sleep(2);
+		FakeSleepUtil.sleep(0.3);
 		return result;
 	}
 	public static void getWithoutReturn(String url, Logger logger) {
@@ -97,7 +97,7 @@ public class HttpUtil {
 				}
 			}
 		}
-		FakeSleepUtil.sleep(2);
+		FakeSleepUtil.sleep(0.3);
 	}
 	public static String post(String url, Map<String, Object> param) {
 		return post(url, param, logger);
@@ -132,7 +132,7 @@ public class HttpUtil {
 				}
 			}
 		}
-		FakeSleepUtil.sleep(2);
+		FakeSleepUtil.sleep(0.5);
 		return result;
 	}
 	public static void postWithoutReturn(String url, Map<String, Object> param, Logger logger) {
@@ -162,6 +162,6 @@ public class HttpUtil {
 				}
 			}
 		}
-		FakeSleepUtil.sleep(2);
+		FakeSleepUtil.sleep(0.5);
 	}
 }
