@@ -189,6 +189,7 @@ public class RaidBiz {
 						battleTurns = 3;
 					}
 					BattleInfo battleInfo = RaidService.battle(battleTurns);
+					FakeSleepUtil.sleep(3, 4);
 					while(!battleInfo.getResult().equals(BattleResult.win)) {
 						if(!ensureWeapon()) {
 							pause = true;
@@ -213,7 +214,7 @@ public class RaidBiz {
 						}
 						HttpUtil.get("pve.php");
 						battleInfo = RaidService.battle(battleTurns);
-						FakeSleepUtil.sleep(1, 2);
+						FakeSleepUtil.sleep(3, 4);
 					}
 					if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
 						Set<Integer> value = new HashSet<Integer>();
@@ -644,7 +645,7 @@ public class RaidBiz {
 					}
 					HttpUtil.get("pve.php");
 					battleInfo = RaidService.battle(battleTurns);
-					FakeSleepUtil.sleep(1, 2);
+					FakeSleepUtil.sleep(3, 4);
 				}
 				RaidService.addDeadPosition();
 				if(!ensureWeapon()) {
