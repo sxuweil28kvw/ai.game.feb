@@ -175,7 +175,11 @@ public class MissionService {
 					String luneisi = HttpUtil.get("move.php?mov=1102");
 					MoveParser.parseMove(luneisi);
 					if(!luneisi.contains("特缇斯")) {
-						MoveService.moveTo(1152);
+						MoveService.moveTo(1143);
+						String shazhoushaozhan = HttpUtil.get("move.php?mov=1142");
+						if(!shazhoushaozhan.contains("特缇斯")) {
+							MoveService.moveTo(1152);
+						}
 					}
 				}
 			}

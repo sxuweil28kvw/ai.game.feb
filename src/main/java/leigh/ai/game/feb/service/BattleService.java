@@ -139,7 +139,7 @@ public class BattleService {
 	public static void useStaff(MyItem t) {
 		PersonStatusParser.parseAfterUseItem(HttpUtil.get("useitem_heal.php?goto=useitem&wrap=" + t.getPosition()));
 		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
-		logger.debug("使用了回复之杖");
+		logger.debug("使用了" + t.getName());
 	}
 	public static void buyMedicine() {
 		if(JobService.canUseStaff()) {
