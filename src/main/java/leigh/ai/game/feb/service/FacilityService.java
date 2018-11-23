@@ -101,7 +101,7 @@ public class FacilityService {
 	}
 	public static void repairWeapon(int position) {
 		if(PersonStatusService.money < 2000) {
-			drawCash(19000);
+			drawCash(42000);
 		}
 		FacilityType[] types = null;
 		if(PersonStatusService.memberCard) {
@@ -120,7 +120,7 @@ public class FacilityService {
 			return;
 		}
 		if(PersonStatusService.money < price) {
-			drawCash(18000 + price);
+			drawCash(29000 + price);
 		}
 		String response = HttpUtil.get("shopwep_updata.php?goto=repair&wrap=" + positionCode);
 		WeaponShopParser.parseAfterRepair(response);
@@ -149,7 +149,7 @@ public class FacilityService {
 		int price = ItemShopParser.parseBuyPrice(HttpUtil.get("shopits_co.php?goto=buy&buytype=0&item=" + itemcode));
 		if(PersonStatusService.money < price) {
 			int location = PersonStatusService.currentLocation;
-			drawCash(19000 + price);
+			drawCash(29000 + price);
 			MoveService.moveTo(location);
 		}
 		ItemShopParser.afterBuy(HttpUtil.get("shopits_updata.php?goto=buy&buytype=0&item=" + itemcode));
