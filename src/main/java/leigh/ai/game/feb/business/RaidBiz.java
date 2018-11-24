@@ -503,6 +503,7 @@ public class RaidBiz {
 				}
 			}
 			battleInfo = RaidService.battle(5);
+			FakeSleepUtil.sleep(2, 3);
 		}
 		//上6楼
 		RaidService.move();
@@ -768,6 +769,10 @@ public class RaidBiz {
 		return true;
 	}
 	
+	/****************
+	 * 副本中检查是否还有武器的方法；当前武器无耐久时切换剩余武器。
+	 * @return
+	 */
 	private static boolean ensureWeapon() {
 		PersonStatusService.update();
 		if(PersonStatusService.weapons.get(0).getAmountLeft() > 0) {

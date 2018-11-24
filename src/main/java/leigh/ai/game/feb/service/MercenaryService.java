@@ -17,6 +17,11 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*************
+ * 佣兵相关
+ * @author FlyQE
+ *
+ */
 public class MercenaryService {
 	private static final Logger logger = LoggerFactory.getLogger(MercenaryService.class);
 	/*************

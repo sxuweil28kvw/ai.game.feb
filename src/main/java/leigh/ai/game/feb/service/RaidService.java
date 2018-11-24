@@ -109,7 +109,7 @@ public class RaidService {
 		} catch(Exception e) {
 			ParserExceptionHandler.handle(e, moveResponse, "解析副本移动结果失败！");
 		}
-		FakeSleepUtil.sleep(3, 5);
+		FakeSleepUtil.sleep(3, 4);
 	}
 	private static void initRaidMap() throws IOException {
 		raidMap = new HashMap<Integer, List<RaidMapType>>();
@@ -300,10 +300,6 @@ public class RaidService {
 	}
 	
 	public static void valkyrieTa6() {
-		
-	}
-	public static void battleTa5Turn5() {
-		BattleInfo battleInfo = RaidService.battle(5);
 		
 	}
 }
