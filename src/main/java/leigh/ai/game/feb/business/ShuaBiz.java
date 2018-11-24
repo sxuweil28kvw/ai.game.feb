@@ -42,7 +42,6 @@ public class ShuaBiz {
 			MoveService.moveTo(battleLocation);
 			while(shards < fullShards) {
 				BattleInfo info = BattleService.fight(BattleService.searchUntilEnemy());
-				FakeSleepUtil.sleep(3, 4);
 				for(String s: info.getOtherInfo()) {
 					if(s.contains(item)) {
 						shards++;

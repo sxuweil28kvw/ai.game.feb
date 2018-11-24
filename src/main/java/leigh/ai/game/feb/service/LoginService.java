@@ -135,7 +135,7 @@ public class LoginService {
 		
 		String reg = HttpUtil.post("register_updata.php", param);
 		if(reg.contains("注册完成")) {
-			logger.info("天马：" + u + "  注册完成！");
+			logger.info("{}：{} 注册完成！", job, u);
 		}
 		return false;
 	}

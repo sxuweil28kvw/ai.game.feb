@@ -158,7 +158,7 @@ public class RaidService {
 		if(!haveMedicine) {
 			BattleService.buyMedicine();
 		}
-		if(!haveHolywater) {
+		if(!JobService.canUseStaff() && !haveHolywater) {
 			BattleService.buyHolywater();
 		}
 		

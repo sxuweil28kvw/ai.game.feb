@@ -61,6 +61,7 @@ public class BattleService {
 	public static BattleInfo fight(int level) {
 		String battleResponse = HttpUtil.get("battle.php?suodi=soldier&lv=" + level);
 		BattleInfo result = BattleResultParser.parse(battleResponse);
+		FakeSleepUtil.sleep(3, 4);
 		return result;
 	}
 	public static void readyForBattle() {
@@ -93,7 +94,9 @@ public class BattleService {
 		}
 		if(!hasShengshui) {
 			if(autoBuy) {
-				buyHolywater();
+				if(!buyHolywater()) {
+					return false;
+				}
 			} else {
 				return false;
 			}
@@ -174,7 +177,21 @@ public class BattleService {
 		String items = HttpUtil.get("useitem.php");
 		PersonStatusParser.itemsAfterUse(items);
 	}
-	public static void buyHolywater() {
+	public static boolean buyHolywater() {
+		if(PersonStatusService.items.size() == 5) {
+			for(MyItem item: PersonStatusService.items) {
+				if(item.getName().equals("万灵药") || item.getName().equals("伤药")
+						|| item.getName().equals("回复之杖") || item.getName().equals("治疗之杖")
+						|| item.getName().equals("痊愈之杖")) {
+					FacilityService.sellItem(item);
+					break;
+				}
+			}
+		}
+		if(PersonStatusService.items.size() == 5) {
+			return false;
+		}
+		
 		if(PersonStatusService.memberCard) {
 			if(PersonStatusService.money < 7500) {
 				FacilityService.drawCash(19000);
@@ -186,5 +203,6 @@ public class BattleService {
 			MoveService.movePath(MapService.findFacilityExceptTraffics(PersonStatusService.currentLocation, new FacilityType[]{FacilityType.itemshop}, Traffic.fly));
 			FacilityService.buyItem("aaac");
 		}
+		return true;
 	}
 }

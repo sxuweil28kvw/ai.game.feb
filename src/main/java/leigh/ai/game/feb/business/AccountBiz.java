@@ -90,7 +90,6 @@ public class AccountBiz {
 		while(PersonStatusService.level < level) {
 			MoveService.moveTo(location);
 			BattleInfo info = BattleService.fight(BattleService.searchUntilEnemy());
-			FakeSleepUtil.sleep(3, 4);
 			for(String s: info.getOtherInfo()) {
 				if(s.contains(item)) {
 					shards++;

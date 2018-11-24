@@ -54,10 +54,9 @@ public class TagangMissionService {
 			MoveService.movePath(MapService.findPath(PersonStatusService.currentLocation, location));
 			int level = BattleService.searchUntilEnemy();
 			logger.debug("魔物/魔将等级=" + level);
-			FakeSleepUtil.sleep(3, 5);
+			FakeSleepUtil.sleep(2, 4);
 			BattleInfo battleInfo = BattleService.fight(level);
 			logger.debug("塔港任务战斗结果：" + battleInfo.getResult());
-			FakeSleepUtil.sleep(3);
 			if(battleInfo.getResult().equals(BattleResult.win)) {
 				return;
 			}
