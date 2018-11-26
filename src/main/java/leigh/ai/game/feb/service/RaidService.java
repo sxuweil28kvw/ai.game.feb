@@ -134,7 +134,10 @@ public class RaidService {
 		}
 	}
 	public static BattleInfo battle(int turns) {
-		return BattleResultParser.parse(HttpUtil.get("battle.php?suodi=elite&Bout=" + turns));
+		String s = HttpUtil.get("battle.php?suodi=elite&Bout=" + turns);
+		FakeSleepUtil.sleep(3, 4);
+		return BattleResultParser.parse(s);
+		
 	}
 	
 	public static void readyForGuya() {

@@ -189,7 +189,6 @@ public class RaidBiz {
 						battleTurns = 3;
 					}
 					BattleInfo battleInfo = RaidService.battle(battleTurns);
-					FakeSleepUtil.sleep(3, 4);
 					while(!battleInfo.getResult().equals(BattleResult.win)) {
 						if(!ensureWeapon()) {
 							pause = true;
@@ -347,7 +346,6 @@ public class RaidBiz {
 						}
 						HttpUtil.get("pve.php");
 						battleInfo = RaidService.battle(battleTurns);
-						FakeSleepUtil.sleep(1, 2);
 					}
 					if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
 						Set<Integer> value = new HashSet<Integer>();
@@ -503,7 +501,6 @@ public class RaidBiz {
 				}
 			}
 			battleInfo = RaidService.battle(5);
-			FakeSleepUtil.sleep(2, 3);
 		}
 		//上6楼
 		RaidService.move();
@@ -646,7 +643,6 @@ public class RaidBiz {
 					}
 					HttpUtil.get("pve.php");
 					battleInfo = RaidService.battle(battleTurns);
-					FakeSleepUtil.sleep(3, 4);
 				}
 				RaidService.addDeadPosition();
 				if(!ensureWeapon()) {
