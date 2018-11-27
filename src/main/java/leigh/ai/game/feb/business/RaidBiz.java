@@ -552,6 +552,7 @@ public class RaidBiz {
 								continue w6;
 							}
 						}
+						battleInfo = RaidService.battle(5);
 					}
 					RaidService.addDeadPosition();
 					
