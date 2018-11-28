@@ -3,22 +3,22 @@
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout
-				pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+				pattern="%d{yyyyMMdd HH:mm:ss} %-5level %logger{1} - %msg%n" />
 		</Console>
 		<File name="File1" fileName="/data1/logs/feb/hc.log"
 			bufferedIO="true">
 			<PatternLayout
-				pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+				pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{1} - %msg%n" />
 		</File>
 		<File name="File2" fileName="/data1/logs/feb/main.log"
 			bufferedIO="true">
 			<PatternLayout
-				pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+				pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{1} - %msg%n" />
 		</File>
 		<File name="File_mapservice" fileName="/data1/logs/feb/mapservice.log"
             bufferedIO="true">
             <PatternLayout
-                pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+                pattern="%d{yyyyMMdd HH:mm:ss} [%t] %-5level %logger{1} - %msg%n" />
         </File>
 	</Appenders>
 	<Loggers>
