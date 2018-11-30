@@ -50,7 +50,7 @@ public class ShuaBiz {
 				PersonStatusService.update();
 				if(PersonStatusService.weapons.get(0).getAmountLeft() < 1) {
 					if(PersonStatusService.money < 2000) {
-						FacilityService.drawCash(19000);
+						FacilityService.drawCash(42000);
 					}
 					FacilityService.repairWeapon(PersonStatusService.weapons.get(0));
 				}

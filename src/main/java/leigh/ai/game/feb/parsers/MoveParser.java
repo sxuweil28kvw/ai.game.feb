@@ -20,7 +20,7 @@ public class MoveParser {
 			Document doc = Jsoup.parse(str);
 			String statusStr = doc.body().child(0).child(0).attr("onload");
 			if(statusStr.startsWith("chatturn")) {
-				statusStr = doc.body().child(0).child(1).attr("onload");
+				statusStr = doc.body().child(1).child(0).attr("onload");
 			}
 			PersonStatusService.HP = Integer.parseInt(statusStr.split("'j_hp','", 2)[1].split("'", 2)[0]);
 			PersonStatusService.maxHP = Integer.parseInt(statusStr.split("'j_mhp','", 2)[1].split("'", 2)[0]);
