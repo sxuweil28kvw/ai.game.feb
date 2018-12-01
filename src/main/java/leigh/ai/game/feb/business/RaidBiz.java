@@ -490,7 +490,7 @@ public class RaidBiz {
 		}
 		BattleService.selfHeal(true);
 		prepare();
-		FacilityService.drawCash(20000);
+		FacilityService.drawCash(36000);
 		
 		MoveService.moveTo(1114);
 		MoveService.enterTower();
