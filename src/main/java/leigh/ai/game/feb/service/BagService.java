@@ -19,6 +19,7 @@ public class BagService {
 	public static Map<Integer, Integer> resourceAmount = new HashMap<Integer, Integer>(resourceNameList.length);
 	public static void update() {
 		String stuff = HttpUtil.get("stuff.php");
+		resourceAmount.clear();
 		try {
 			Document doc = Jsoup.parse(stuff);
 			Element tbody1 = doc.body().child(0).child(0).child(1).child(1).child(0).child(0).child(0);

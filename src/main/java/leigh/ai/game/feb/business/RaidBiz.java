@@ -117,6 +117,10 @@ public class RaidBiz {
 		String p1 = args[1];
 		String u2 = args[2];
 		String p2 = args[3];
+		int maxTimes = -1;
+		if(args.length > 4) {
+			maxTimes = Integer.parseInt(args[4]);
+		}
 		LoginService.login(u1, p1);
 		if(PersonStatusService.currentLocation < 0) {
 			RaidService.exit();
@@ -168,6 +172,7 @@ public class RaidBiz {
 			System.out.println("资源快满了！");
 			System.exit(0);
 		}
+		int times = 0;
 		while(true) {
 			MoveService.moveTo(1114);
 			MoveService.enterTower();
@@ -271,6 +276,11 @@ public class RaidBiz {
 				System.exit(0);
 			}
 			prepare();
+			times++;
+			if(maxTimes > 0 && times >= maxTimes) {
+				logger.info("已刷龙皮{}次，结束！", times);
+				break;
+			}
 		}
 	}
 
