@@ -1,5 +1,7 @@
 package leigh.ai.game.feb.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,12 +45,12 @@ public class MercenaryService {
 			return;
 		}
 		MercenaryService.update();
-		while(MercenaryService.num < MercenaryService.limit) {
+		while(MercenaryService.num <= MercenaryService.limit - 10) {
 			Set<Integer> origin = new HashSet<Integer>(myMercenaries.size());
 			for(Mercenary m: myMercenaries) {
 				origin.add(m.getId());
 			}
-			FacilityService.mercenary(limit - num);
+			FacilityService.mercenaryTen();
 			MercenaryService.update();
 			for(int i = 0; i < myMercenaries.size(); i++) {
 				Mercenary m = myMercenaries.get(i);
@@ -66,7 +68,8 @@ public class MercenaryService {
 					fireMercenary(m.getId());
 					i--;
 				} else {
-					trainMercenary(m.getId());
+					rename(m.getId(), "苗");
+//					trainMercenary(m.getId());
 				}
 			}
 			MercenaryService.update();
@@ -74,6 +77,14 @@ public class MercenaryService {
 				System.out.println("没有麻花了");
 				return;
 			}
+		}
+	}
+	private static void rename(int id, String newName) {
+		HttpUtil.get("soldier_co.php?goto=resetname&soldier=" + id);
+		try {
+			HttpUtil.get("soldier_updata.php?goto=resetname&soldier=" + id + "&maintext=" + URLEncoder.encode(newName, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
 	}
 	private static void trainMercenary(int id) {

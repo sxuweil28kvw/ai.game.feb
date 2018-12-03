@@ -330,4 +330,23 @@ public class FacilityService {
 		}
 		return true;
 	}
+	public static boolean mercenaryTen() {
+		MoveService.moveToFacility(FacilityType.inn);
+		if(PersonStatusService.mahua < 45) {
+			return false;
+		}
+		HttpUtil.get("shoptap.php");
+		String innTell = HttpUtil.get("shoptap_wi.php?goto=sol");
+		if(!innTell.contains("雇佣十个佣兵")) {
+			logger.warn("酒馆没有雇佣是个佣兵选项！\n{}", innTell);
+			return false;
+		}
+		innTell = HttpUtil.get("shoptap_co.php?goto=sol&type=1&num=10");
+		if(!innTell.startsWith("这帮家伙归你了")) {
+			return false;
+		}
+		logger.debug("雇佣了10个佣兵。");
+		PersonStatusService.mahua -= 45;
+		return true;
+	}
 }
