@@ -41,7 +41,11 @@ public class BagService {
 				StringBuilder log = new StringBuilder();
 				log.append("空余资源背包：").append(PersonStatusService.bagFree).append("/").append(PersonStatusService.bagLimit).append("[");
 				for(Integer resourceCode: resourceAmount.keySet()) {
-					log.append(resourceNameList[resourceCode - 1]).append(":").append(resourceAmount.get(resourceCode)).append(",");
+					if(resourceCode > resourceNameList.length) {
+						log.append("未知资源").append(":").append(resourceAmount.get(resourceCode)).append(",");
+					} else {
+						log.append(resourceNameList[resourceCode - 1]).append(":").append(resourceAmount.get(resourceCode)).append(",");
+					}
 				}
 				log.append("]");
 				logger.debug(log.toString());
