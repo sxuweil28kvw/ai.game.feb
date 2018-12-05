@@ -71,7 +71,7 @@ public class MapService {
 		map.get(2034).getNeighbours(Traffic.border).add(map.get(2033));//黑克境
 		map.get(2060).getNeighbours(Traffic.border).add(map.get(2016));//乌兰境
 		map.get(2016).getNeighbours(Traffic.border).add(map.get(2060));//乌兰境
-		// 飞行
+		// 飞行-旧大陆
 		int[] airports = new int[] {
 				1152, 1137, 1128, 1123, 1122, 1119, 1149, 1113, 1204,
 				1156, 1142, 1102, 1107, 1183, 1179, 
@@ -84,7 +84,7 @@ public class MapService {
 				map.get(airports[i]).getNeighbours(Traffic.fly).add(map.get(airports[j]));
 			}
 		}
-		// 副本
+		// 副本-旧大陆
 		map.get(-1).getNeighbours(Traffic.raid_exit).add(map.get(1114));
 		map.get(-2).getNeighbours(Traffic.raid_exit).add(map.get(1114));
 		map.get(-3).getNeighbours(Traffic.raid_exit).add(map.get(1114));

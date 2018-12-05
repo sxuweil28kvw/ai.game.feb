@@ -13,6 +13,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import leigh.ai.game.feb.parsers.NpcParser;
 import leigh.ai.game.feb.service.BagService;
 import leigh.ai.game.feb.service.BattleService;
 import leigh.ai.game.feb.service.FacilityService;
@@ -438,11 +439,6 @@ public class RaidBiz {
 	}
 	
 	public static void ta6(String propertyFile) {
-		ta6Once(propertyFile);
-		
-	}
-	
-	public static void ta6Once(String propertyFile) {
 		Properties prop = new Properties();
 		try {
 			BufferedReader br = new BufferedReader(new UnicodeReader(new FileInputStream(propertyFile), "utf8"));
@@ -539,9 +535,212 @@ public class RaidBiz {
 			}
 		}
 		LoginService.logout();
+		logger.info("塔6第一轮完毕！");
+		
+		int ta6Times = 1;
+		
+		LoginService.login(uVlk, pVlk);
+		
+		RaidService.forceMove();
+		
+		String selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
+		List<String> summoners = NpcParser.parseSelenaSummoners(selenaSaid);
+		while(summoners.size() > 0) {
+			HttpUtil.get(summoners.get(0));
+			battleInfo = RaidService.battle(5);
+			while(!battleInfo.getResult().equals(BattleResult.win)) {
+				if(!ensureWeapon()) {
+					RaidService.exit();
+					prepare();
+					MoveService.moveTo(1114);
+					MoveService.enterTower(5);
+					RaidService.move();
+					RaidService.moveUntil(24);
+				}
+				if(battleInfo.getResult().equals(BattleResult.lose)) {
+					if(!RaidService.selfHeal()) {
+						RaidService.exit();
+						prepare();
+						MoveService.moveTo(1114);
+						MoveService.enterTower(5);
+						RaidService.move();
+						RaidService.moveUntil(24);
+					}
+				} else if(PersonStatusService.HP < 35) {
+					if(!RaidService.selfHeal()) {
+						RaidService.exit();
+						prepare();
+						MoveService.moveTo(1114);
+						MoveService.enterTower(5);
+						RaidService.move();
+						RaidService.moveUntil(24);
+					}
+				}
+				if(PersonStatusService.AP < 10) {
+					if(!RaidService.addAp()) {
+						RaidService.exit();
+						prepare();
+						MoveService.moveTo(1114);
+						MoveService.enterTower(5);
+						RaidService.move();
+						RaidService.moveUntil(24);
+					}
+				}
+				battleInfo = RaidService.battle(5);
+			}
+			
+			RaidService.myPosition = 0;
+			RaidService.recallTa6Monsters();
+			
+			if(!ensureWeapon()) {
+				RaidService.exit();
+				prepare();
+				MoveService.moveTo(1114);
+				MoveService.enterTower(5);
+				RaidService.move();
+			}
+			if(battleInfo.getResult().equals(BattleResult.lose)) {
+				if(!RaidService.selfHeal()) {
+					RaidService.exit();
+					prepare();
+					MoveService.moveTo(1114);
+					MoveService.enterTower(5);
+					RaidService.move();
+				}
+			} else if(PersonStatusService.HP < 35) {
+				if(!RaidService.selfHeal()) {
+					RaidService.exit();
+					prepare();
+					MoveService.moveTo(1114);
+					MoveService.enterTower(5);
+					RaidService.move();
+				}
+			}
+			if(PersonStatusService.AP < 10) {
+				if(!RaidService.addAp()) {
+					RaidService.exit();
+					prepare();
+					MoveService.moveTo(1114);
+					MoveService.enterTower(5);
+					RaidService.move();
+				}
+			}
+			
+			battleTa6();
+
+			logger.info("塔6第" + (++ta6Times) + "轮完毕");
+			if(ta6Times >= 5) {
+				break;
+			}
+			
+			RaidService.forceMove();
+			selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
+			summoners = NpcParser.parseSelenaSummoners(selenaSaid);
+		}
+	}
+	
+	public static void ta6Once(String propertyFile) {
+		Properties prop = new Properties();
+		try {
+			BufferedReader br = new BufferedReader(new UnicodeReader(new FileInputStream(propertyFile), "utf8"));
+			String line = br.readLine();
+			while(line != null) {
+				if(line.trim().equals("") || line.startsWith("#")) {
+					continue;
+				}
+				String[] spl = line.split("=", 2);
+				prop.put(spl[0], spl[1]);
+				
+				line = br.readLine();
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		String uAss = prop.getProperty("刺客");
+		String pAss = prop.getProperty("密码" + uAss);
+		String uVlk = prop.getProperty("圣女");
+		String pVlk = prop.getProperty("密码" + uVlk);
+		
+		LoginService.login(uAss, pAss);
+		if(PersonStatusService.currentLocation < 0) {
+			RaidService.exit();
+		}
+		LoginService.logout();
+		System.out.println(uVlk + "进塔卡进度");
+		LoginService.login(uVlk, pVlk);
+		
+		if(PersonStatusService.bagFree < 70) {
+			System.out.println("圣女资源快满了！");
+			LoginService.logout();
+			System.exit(0);
+		}
+		
+		prepare();
+		
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+		LoginService.logout();
+		
+		LoginService.login(uAss, pAss);
+		
+		if(PersonStatusService.bagFree < 15) {
+			System.out.println("刺客资源快满了！");
+			LoginService.logout();
+			System.exit(0);
+		}
+		BattleService.selfHeal(true);
+		prepare();
+		
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+		
+		toTa5(uAss);
+		
+		RaidService.ta5();
+		BattleInfo battleInfo = RaidService.battle(5);
+		while(!battleInfo.getResult().equals(BattleResult.win)) {
+			if(!ensureWeapon()) {
+				reEnterTower();
+				toTa5(uAss);
+			}
+			if(PersonStatusService.AP < 10) {
+				if(!RaidService.addAp()) {
+					reEnterTower();
+					toTa5(uAss);
+				}
+			}
+			battleInfo = RaidService.battle(5);
+			
+		}
+		//上6楼
+		RaidService.move();
+		LoginService.logout();
+		
+		LoginService.login(uVlk, pVlk);
+		//坐电梯到5楼；圣女打前4楼的逻辑尚未实现
+		MoveService.enterTower(5);
+		
+		battleTa6();
+		
+		LoginService.logout();
+		
+		LoginService.login(uAss, pAss);
+		// 此刻刺客在6楼第一格……目前登录时没有确定自己在副本中位置，挺坑的！
+		RaidService.myPosition = 0;
+		while(RaidService.myPosition < 24) {
+			RaidService.move();
+			if(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)
+					.equals(RaidMapType.chest)) {
+				RaidService.openChest(PersonStatusService.userId, uAss);
+			}
+		}
+		LoginService.logout();
 		logger.info("塔6一次完毕！");
 	}
 	
+
 	private static void battleTa6() {
 		BattleInfo battleInfo = null;
 		w6:

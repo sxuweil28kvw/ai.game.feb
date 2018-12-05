@@ -43,6 +43,9 @@ public class RaidService {
 			e.printStackTrace();
 		}
 	}
+	public static void forceMove() {
+		HttpUtil.get("move.php?goto=mov");
+	}
 	public static void move() {
 		String moveResponse = HttpUtil.get("move.php?goto=mov");
 		try {
@@ -302,7 +305,28 @@ public class RaidService {
 		}
 	}
 	
-	public static void valkyrieTa6() {
-		
+	/*****************
+	 * 移动到至少（maxPosition+1）格。注意position是从0开始的。
+	 * 如：在塔6执行moveUntil(23)则会移动到第24格，或越过24格到达25格为止。
+	 * @param maxPosition
+	 * @return false表示中途被挡住。
+	 */
+	public static boolean moveUntil(int maxPosition) {
+		int originPosition = RaidService.myPosition;
+		while(RaidService.myPosition < maxPosition) {
+			RaidService.move();
+			if(RaidService.myPosition == originPosition) {
+				return false;
+			}
+		}
+		return true;
+	}
+	public static void recallTa6Monsters() {
+		Set<Integer> corpses = RaidService.deadEnemies.get(-6);
+		for(int i = 1; i < 24; i++) {
+			if(!RaidService.raidMap.get(-6).get(i).equals(RaidMapType.chest)) {
+				corpses.remove(i);
+			}
+		}
 	}
 }

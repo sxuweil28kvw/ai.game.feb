@@ -21,72 +21,97 @@ public class Assembled {
 		}
 		String action = args[0];
 		args = Arrays.copyOfRange(args, 1, args.length);
-		if(action.equals("tagang")) {
-			TagangBiz.tagang(args);
-		} else if(action.equals("tagangmowu")) {
-			TagangBiz.onlyMowu(args);
-		} else if(action.equals("move")) {
-			Integer code = MapService.nameLookup.get(args[2]);
-			if(code == null) {
-				System.out.println("指定移动目标不存在，请检查错别字");
-			}
-			LoginService.login(args[0], args[1]);
-			MoveService.moveTo(code);
-		} else if(action.equals("allmovetodesert")) {
-			MoveBiz.allMoveToDesert(args);
-		} else if(action.equals("allmoveto")) {
-			MoveBiz.allMoveTo(args);
-		} else if(action.equals("guozi")) {
-			if(args.length < 3) {
+		switch(action) {
+			case "tagang":
+				TagangBiz.tagang(args);
+				break;
+			case "tagangmowu":
+				TagangBiz.onlyMowu(args);
+				break;
+			case "move":
+				Integer code = MapService.nameLookup.get(args[2]);
+				if(code == null) {
+					System.out.println("指定移动目标不存在，请检查错别字");
+				}
+				LoginService.login(args[0], args[1]);
+				MoveService.moveTo(code);
+				break;
+			case "allmovetodesert":
+				MoveBiz.allMoveToDesert(args);
+				break;
+			case "allmoveto":
+				MoveBiz.allMoveTo(args);
+				break;
+			case "guozi":
+				if(args.length < 3) {
+					printUsage();
+					System.exit(0);
+				}
+				ShuaBiz.guozi(args[0], args[1], args[2]);
+				break;
+			case "guya":
+				RaidBiz.guya(args);
+				break;
+			case "jiapian":
+				if(args.length < 3) {
+					printUsage();
+					System.exit(0);
+				}
+				ShuaBiz.jiapian(args[0], args[1], args[2]);
+				break;
+			case "longpi":
+				if(args.length < 4) {
+					printUsage();
+					System.exit(0);
+				}
+				RaidBiz.longpi(args);
+				break;
+			case "moyan":
+				if(args.length < 4) {
+					printUsage();
+					System.exit(0);
+				}
+				RaidBiz.moyan(args);
+				break;
+			case "ta5":
+				RaidBiz.ta5(args[0], args[1]);
+				break;
+			case "ta6":
+				RaidBiz.ta6(args[0]);
+				break;
+			case "ta6once":
+				RaidBiz.ta6Once(args[0]);
+				break;
+			case "xiaohao":
+				AccountBiz.newAccount(args[0], args[1], args[2], args[3], args[4]);
+				break;
+			case "xiaohaobatch":
+				AccountBiz.batchNewAccount(args[0]);
+				break;
+			case "1zhuan":
+				AccountBiz.yizhuan(args[0], args[1]);
+				break;
+			case "zhaobing":
+				MercenaryBiz.pick(args[0], args[1], Integer.parseInt(args[2]));
+				break;
+			case "shendian":
+				LoginService.login(args[0], args[1]);
+				System.out.println(WabaoService.shrine());
+				break;
+			case "desert":
+				LoginService.login(args[0], args[1]);
+				System.out.println(WabaoService.desert());
+				break;
+			case "tagangdesert":
+				TagangBiz.tagangDesert(args);
+				break;
+			case "tagangshendian":
+				TagangBiz.tagangShrine(args);
+				break;
+			default:
+				System.out.println("不认识的参数！");
 				printUsage();
-				System.exit(0);
-			}
-			ShuaBiz.guozi(args[0], args[1], args[2]);
-		} else if(action.equals("guya")) {
-			RaidBiz.guya(args);
-		} else if(action.equals("jiapian")) {
-			if(args.length < 3) {
-				printUsage();
-				System.exit(0);
-			}
-			ShuaBiz.jiapian(args[0], args[1], args[2]);
-		} else if(action.equals("longpi")) {
-			if(args.length < 4) {
-				printUsage();
-				System.exit(0);
-			}
-			RaidBiz.longpi(args);
-		} else if(action.equals("moyan")) {
-			if(args.length < 4) {
-				printUsage();
-				System.exit(0);
-			}
-			RaidBiz.moyan(args);
-		} else if(action.equals("ta5")) {
-			RaidBiz.ta5(args[0], args[1]);
-		} else if(action.equals("ta6once")) {
-			RaidBiz.ta6Once(args[0]);
-		} else if(action.equals("xiaohao")) {
-			AccountBiz.newAccount(args[0], args[1], args[2], args[3], args[4]);
-		} else if(action.equals("xiaohaobatch")) {
-			AccountBiz.batchNewAccount(args[0]);
-		} else if(action.equals("1zhuan")) {
-			AccountBiz.yizhuan(args[0], args[1]);
-		} else if(action.equals("zhaobing")) {
-			MercenaryBiz.pick(args[0], args[1], Integer.parseInt(args[2]));
-		} else if(action.equals("shendian")) {
-			LoginService.login(args[0], args[1]);
-			System.out.println(WabaoService.shrine());
-		} else if(action.equals("desert")) {
-			LoginService.login(args[0], args[1]);
-			System.out.println(WabaoService.desert());
-		} else if(action.equals("tagangdesert")) {
-			TagangBiz.tagangDesert(args);
-		} else if(action.equals("tagangshendian")) {
-			TagangBiz.tagangShrine(args);
-		} else {
-			System.out.println("不认识的参数！");
-			printUsage();
+				break;
 		}
 	}
 
