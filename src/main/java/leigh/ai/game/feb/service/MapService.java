@@ -94,6 +94,8 @@ public class MapService {
 		map.get(-7).getNeighbours(Traffic.raid_exit).add(map.get(1114));
 		map.get(-8).getNeighbours(Traffic.raid_exit).add(map.get(1114));
 		map.get(-9).getNeighbours(Traffic.raid_exit).add(map.get(1184));
+		map.get(-10).getNeighbours(Traffic.raid_exit).add(map.get(1130));
+		map.get(-11).getNeighbours(Traffic.raid_exit).add(map.get(1130));
 	}
 	
 	private static void initMap(String filePath) {

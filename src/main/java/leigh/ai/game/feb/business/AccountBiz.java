@@ -56,7 +56,7 @@ public class AccountBiz {
 		PersonStatusService.level = 1;
 		LoginService.login(u, p);
 		HttpUtil.get("newbit.php");
-		while(PersonStatusService.maxHP < 23) {
+		while(PersonStatusService.maxHP < 25) {
 			LoginService.logout();
 			LoginService.deleteAccount(u, p);
 			LoginService.register(u, p, job, abe, answers);

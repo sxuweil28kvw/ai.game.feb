@@ -6,27 +6,34 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import leigh.ai.game.feb.parsers.BattleResultParser;
-import leigh.ai.game.feb.parsers.ParserExceptionHandler;
-import leigh.ai.game.feb.parsers.PersonStatusParser;
-import leigh.ai.game.feb.parsers.WeaponShopParser;
-import leigh.ai.game.feb.service.battle.BattleInfo;
-import leigh.ai.game.feb.service.map.Traffic;
-import leigh.ai.game.feb.service.raid.RaidMapType;
-import leigh.ai.game.feb.service.status.MyStatus.MyItem;
-import leigh.ai.game.feb.service.status.MyStatus.MyWeapon;
-import leigh.ai.game.feb.util.FakeSleepUtil;
-import leigh.ai.game.feb.util.HttpUtil;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import leigh.ai.game.feb.parsers.BattleResultParser;
+import leigh.ai.game.feb.parsers.ParserExceptionHandler;
+import leigh.ai.game.feb.parsers.PersonStatusParser;
+import leigh.ai.game.feb.parsers.RaidParser;
+import leigh.ai.game.feb.parsers.WeaponShopParser;
+import leigh.ai.game.feb.service.FacilityService.FacilityType;
+import leigh.ai.game.feb.service.battle.BattleInfo;
+import leigh.ai.game.feb.service.battle.BattleResult;
+import leigh.ai.game.feb.service.map.Traffic;
+import leigh.ai.game.feb.service.raid.RaidBattleData;
+import leigh.ai.game.feb.service.raid.RaidMapType;
+import leigh.ai.game.feb.service.raid.RaidStopReason;
+import leigh.ai.game.feb.service.status.Item;
+import leigh.ai.game.feb.service.status.MyStatus.MyItem;
+import leigh.ai.game.feb.service.status.MyStatus.MyWeapon;
+import leigh.ai.game.feb.util.FakeSleepUtil;
+import leigh.ai.game.feb.util.HttpUtil;
 
 public class RaidService {
 	private static Logger logger = LoggerFactory.getLogger(RaidService.class);
@@ -197,7 +204,7 @@ public class RaidService {
 			}
 			if(t.getName().equals("伤药") || t.getName().equals("万灵药")) {
 				haveMedicine = true;
-				BattleService.useItem(t);
+				ItemService.useItem(t);
 				break;
 			} 
 		}
@@ -223,7 +230,7 @@ public class RaidService {
 				return true;
 			}
 			if(t.getName().equals("圣水") || t.getName().equals("烧酒") || t.getName().equals("卡博雷酒")) {
-				BattleService.useItem(t.getPosition());
+				ItemService.useItem(t.getPosition());
 				return true;
 			}
 		}
@@ -311,7 +318,7 @@ public class RaidService {
 	 * @param maxPosition
 	 * @return false表示中途被挡住。
 	 */
-	public static boolean moveUntil(int maxPosition) {
+	public static boolean moveNoBattleUntil(int maxPosition) {
 		int originPosition = RaidService.myPosition;
 		while(RaidService.myPosition < maxPosition) {
 			RaidService.move();
@@ -321,6 +328,20 @@ public class RaidService {
 		}
 		return true;
 	}
+	public static void moveNoBattleUntil(int location, int position) {
+		if(PersonStatusService.currentLocation > 0) {
+			throw new IllegalStateException("无法移动：不在副本中！");
+		}
+		if(PersonStatusService.currentLocation < 0 && PersonStatusService.currentLocation < location) {
+			logger.warn("所在层数{}高于目标层数{}！", PersonStatusService.currentLocation, location);
+		}
+		while(PersonStatusService.currentLocation > location) {
+			RaidService.move();
+		}
+		while(RaidService.myPosition < position) {
+			RaidService.move();
+		}
+	}
 	public static void recallTa6Monsters() {
 		Set<Integer> corpses = RaidService.deadEnemies.get(-6);
 		for(int i = 1; i < 24; i++) {
@@ -329,4 +350,180 @@ public class RaidService {
 			}
 		}
 	}
+	public static int firstEnemyPosition(int location) {
+		List<RaidMapType> map = RaidService.raidMap.get(location);
+		for(int i = 0; i < map.size(); i++) {
+			if(!map.get(i).equals(RaidMapType.enemy) && !map.get(i).equals(RaidMapType.stopingEnemy)) {
+				continue;
+			}
+			if(!RaidService.deadEnemies.containsKey(location)) {
+				return i;
+			}
+			if(RaidService.deadEnemies.get(location).contains(i)) {
+				continue;
+			} else {
+				return i;
+			}
+		}
+		return -1;
+	}
+	/************
+	 * 在副本外检查圣水
+	 */
+	public static void ensureHolywaterOutside() {
+		List<MyItem> holywater = new LinkedList<MyItem>();
+		int totalAmount = 0;
+		for(MyItem t: PersonStatusService.items) {
+			if(t.getName().equals("圣水")) {
+				holywater.add(t);
+				totalAmount += t.getAmountLeft();
+			}
+		}
+		if(PersonStatusService.memberCard && totalAmount < 25) {
+			if(PersonStatusService.money > 50000 - totalAmount * 150) {
+				FacilityService.saveMoney();
+			}
+			MoveService.moveToFacility(FacilityType.itemshopMember);
+			if(holywater.size() > 0) {
+				for(MyItem t: holywater) {
+					FacilityService.sellItem(t);
+				}
+			}
+			if(PersonStatusService.items.size() == 5) {
+				for(MyItem t: PersonStatusService.items) {
+					if(t.getName().equals("伤药") || t.getName().equals("万灵药")
+							|| t.getName().equals(Item.E杖.getName())
+							|| t.getName().equals(Item.D杖.getName())
+							|| t.getName().equals(Item.C杖.getName())) {
+						continue;
+					}
+					FacilityService.storeItem(t.getPosition());
+				}
+			}
+			if(PersonStatusService.items.size() == 5) {
+				FacilityService.storeItem("1");
+			}
+			FacilityService.buyItem(Item.会员圣水.getCode());
+		} else if(!PersonStatusService.memberCard && totalAmount < 3){
+			MoveService.moveToFacility(FacilityType.itemshop);
+			if(holywater.size() > 0) {
+				for(MyItem t: holywater) {
+					FacilityService.sellItem(t);
+				}
+			}
+			if(PersonStatusService.items.size() == 5) {
+				for(MyItem t: PersonStatusService.items) {
+					if(t.getName().equals("伤药") || t.getName().equals("万灵药")
+							|| t.getName().equals(Item.E杖.getName())
+							|| t.getName().equals(Item.D杖.getName())
+							|| t.getName().equals(Item.C杖.getName())) {
+						continue;
+					}
+					FacilityService.storeItem(t.getPosition());
+				}
+			}
+			if(PersonStatusService.items.size() == 5) {
+				FacilityService.storeItem("1");
+			}
+			FacilityService.buyItem(Item.小圣水.getCode());
+		}
+	}
+	public static boolean buy5Staff() {
+		PersonStatusService.update();
+		boolean atBank = false;
+		List<MyItem> cStaffs = new LinkedList<MyItem>();
+		Item bestStaff = PersonStatusService.getBestStaff();
+		for(MyItem item: PersonStatusService.items) {
+			if(!item.getName().equals(bestStaff.getName())) {
+				if(!atBank) {
+					MoveService.moveToFacility(FacilityType.bank);
+					atBank= true;
+				}
+				if(!FacilityService.storeItem(item.getPosition())) {
+					return false;
+				}
+			} else {
+				cStaffs.add(item);
+			}
+		}
+		List<MyItem> staffsToSell = new ArrayList<MyItem>(cStaffs.size());
+		int sellMoney = 0;
+		for(MyItem staff: cStaffs) {
+			if(staff.getAmountLeft() < 14) {
+				staffsToSell.add(staff);
+				sellMoney += staff.getAmountLeft() * 75;
+			}
+		}
+		if(PersonStatusService.money < 8000) {
+			if(!atBank) {
+				MoveService.moveToFacility(FacilityType.bank);
+				atBank= true;
+			}
+			FacilityService.drawCash(19000 - sellMoney + 1125 * (5 - cStaffs.size() + staffsToSell.size()));
+		}
+		MoveService.moveToFacility(FacilityType.itemshop);
+		for(MyItem staff: staffsToSell) {
+			FacilityService.sellItem(staff);
+		}
+		for(int i = cStaffs.size() - staffsToSell.size(); i < 5; i++) {
+			FacilityService.buyItem(bestStaff.getCode());
+		}
+		return true;
+	}
+	public static RaidStopReason raidBattle() {
+		BattleInfo result;
+		do {
+			RaidBattleData data = RaidParser.parseBattleData(HttpUtil.get("pve.php"));
+			
+			int enemyMaxDmg1t = data.getEnemyMaxDmg1t();
+			if(enemyMaxDmg1t >= PersonStatusService.maxHP) {
+				//what to do?
+			} else if(enemyMaxDmg1t >= data.getMyHp()) {
+				if(!RaidService.selfHeal()) {
+					return RaidStopReason.noHeal;
+				}
+				data = RaidParser.parseBattleData(HttpUtil.get("pve.php"));
+			}
+			
+			if(PersonStatusService.AP < 10) {
+				if(!RaidService.addAp()) {
+					return RaidStopReason.noAp;
+				}
+			}
+			
+			int turns;
+			
+			if(data.isOneTurn()) {
+				turns = 5;
+			} else if(enemyMaxDmg1t == 0) {
+				turns = 5;
+			} else {
+				turns = data.getMyHp() / enemyMaxDmg1t;
+			}
+			
+			if(!RaidService.ensureWeapon()) {
+				return RaidStopReason.noWeapon;
+			}
+			result = battle(turns);
+		} while(!result.getResult().equals(BattleResult.win));
+		return null;
+	}
+	/****************
+	 * 副本中检查是否还有武器的方法；当前武器无耐久时切换剩余武器。
+	 * @return
+	 */
+	public static boolean ensureWeapon() {
+		PersonStatusService.update();
+		if(PersonStatusService.weapons.get(0).getAmountLeft() > 0) {
+			return true;
+		}
+		for(int i = 1; i < PersonStatusService.weapons.size(); i++) {
+			if(PersonStatusService.weapons.get(i).getAmountLeft() > 0) {
+				PersonStatusService.equipWeapon(PersonStatusService.weapons.get(i));
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

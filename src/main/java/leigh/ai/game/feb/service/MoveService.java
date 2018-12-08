@@ -90,6 +90,7 @@ public class MoveService {
 			HttpUtil.get("raid_exit.php");
 			moveResult = HttpUtil.get("move.php?display=1");
 			PersonStatusParser.afterMove(moveResult);
+//			RaidService.myPosition = 0;
 			break;
 		case border:
 			String npcid = "222";
@@ -122,6 +123,12 @@ public class MoveService {
 	public static void moveTo(int target) {
 		movePath(MapService.findPath(PersonStatusService.currentLocation, target));
 	}
+	public static boolean enterTemple() {
+		MoveService.moveTo(1130);
+		String npcSaid = HttpUtil.get("npc.php?npcid=112");
+		
+		return true;
+	}
 	public static boolean enterTower() {
 		MoveService.moveTo(1114);
 		String npctell = HttpUtil.get("npc.php?npcid=221&act=Q0_9999B");
@@ -131,6 +138,7 @@ public class MoveService {
 		HttpUtil.get("move.php?display=1");
 		PersonStatusService.currentLocation = -1;
 		RaidService.myPosition = 0;
+		logger.debug("进入威鲁尼塔1层");
 		return true;
 	}
 	public static boolean enterTower(int floor) {

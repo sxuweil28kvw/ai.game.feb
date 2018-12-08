@@ -29,6 +29,7 @@ public class LoginService {
 	public static void login(String u, String p) {
 		username = u;
 		password = p;
+		logger.info("{} 登录中", u);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("logn", "name");
 		param.put("pass", p);

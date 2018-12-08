@@ -59,6 +59,21 @@ public class PersonStatusParser {
 				}
 				logger.debug(sb.toString());
 			}
+			Element weaponClassTableBody = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(0).child(0).child(0).child(0);
+			String[] weaponCategory = {weaponClassTableBody.child(0).child(0).text(), weaponClassTableBody.child(0).child(3).text(),
+					weaponClassTableBody.child(1).child(0).text(), weaponClassTableBody.child(1).child(3).text()};
+			String[] weaponClass = {weaponClassTableBody.child(0).child(2).text(), weaponClassTableBody.child(0).child(5).text(),
+					weaponClassTableBody.child(1).child(2).text(), weaponClassTableBody.child(1).child(5).text()};
+			PersonStatusService.weaponClass.clear();
+			for(int i = 0; i < 4; i++) {
+				if(!weaponClass[i].equals("--")) {
+					PersonStatusService.weaponClass.put(weaponCategory[i], weaponClass[i]);
+				}
+			}
+//			if(logger.isDebugEnabled()) {
+//				logger.debug("weaponClass:{}", PersonStatusService.weaponClass);
+//			}
+			
 			Element cardsTable = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(10).child(0).child(0);
 			PersonStatusService.halfCard = !cardsTable.child(0).child(1).child(0).hasAttr("style");
 			PersonStatusService.memberCard = !cardsTable.child(0).child(1).child(1).hasAttr("style");

@@ -66,8 +66,8 @@ public class BattleService {
 	}
 	public static void readyForBattle() {
 		PersonStatusService.update();
-		if(PersonStatusService.money < 2000) {
-			FacilityService.drawCash(19000);
+		if(PersonStatusService.money < 12000) {
+			FacilityService.drawCash(36000);
 		}
 		if(PersonStatusService.weapons.get(0).getAmountLeft() < 10) {
 			FacilityService.repairWeapon(0);
@@ -88,7 +88,7 @@ public class BattleService {
 			MyItem t = PersonStatusService.items.get(i);
 			if(t.getName().equals("圣水") || t.getName().equals("烧酒") || t.getName().equals("卡博雷酒")) {
 				hasShengshui = true;
-				useItem(t.getPosition());
+				ItemService.useItem(t.getPosition());
 				return true;
 			}
 		}
@@ -116,7 +116,7 @@ public class BattleService {
 			MyItem t = PersonStatusService.items.get(i);
 			if(t.getName().equals("伤药") || t.getName().equals("万灵药")) {
 				haveMedicine = true;
-				useItem(t.getPosition());
+				ItemService.useItem(t.getPosition());
 				logger.debug("使用物品" + t.getName());
 				break;
 			} else if(t.getName().equals("回复之杖") || t.getName().equals("治疗之杖") || t.getName().equals("痊愈之杖")) {
@@ -148,7 +148,7 @@ public class BattleService {
 		if(JobService.canUseStaff()) {
 			MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[]{FacilityType.itemshop}));
 			for(int i = 5 - PersonStatusService.items.size() - 1; i > 0; i--) {
-				FacilityService.buyItem("eaaa");
+				FacilityService.buyItem(PersonStatusService.getBestStaff().getCode());
 			}
 		} else if(PersonStatusService.memberCard) {
 			MapPath pathMember = MapService.findFacility(PersonStatusService.currentLocation, new FacilityType[] {FacilityType.itemshopMember});
@@ -163,19 +163,6 @@ public class BattleService {
 			}
 		}
 		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
-	}
-	public static void useItem(String itemPosition) {
-		String personStat = HttpUtil.get("useitem_co.php?goto=useitem&wrap=" + itemPosition);
-		PersonStatusParser.parseAfterUseItem(personStat);
-		String items = HttpUtil.get("useitem.php");
-		PersonStatusParser.itemsAfterUse(items);
-	}
-	public static void useItem(MyItem t) {
-		String personStat = HttpUtil.get("useitem_co.php?goto=useitem&wrap=" + t.getPosition());
-		logger.debug("使用物品：" + t.getName());
-		PersonStatusParser.parseAfterUseItem(personStat);
-		String items = HttpUtil.get("useitem.php");
-		PersonStatusParser.itemsAfterUse(items);
 	}
 	public static boolean buyHolywater() {
 		if(PersonStatusService.items.size() == 5) {

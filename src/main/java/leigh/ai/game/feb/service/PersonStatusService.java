@@ -6,10 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import leigh.ai.game.feb.parsers.PersonStatusParser;
+import leigh.ai.game.feb.service.status.Item;
 import leigh.ai.game.feb.service.status.MyStatus.MyItem;
 import leigh.ai.game.feb.service.status.MyStatus.MyWeapon;
-import leigh.ai.game.feb.service.status.PersonStatus;
-import leigh.ai.game.feb.util.FakeSleepUtil;
 import leigh.ai.game.feb.util.HttpUtil;
 
 public class PersonStatusService {
@@ -33,22 +32,30 @@ public class PersonStatusService {
 	public static int bagLimit;
 	public static int bagFree;
 	public static int[] resources;
-	public static Map<String, PersonStatus> status = new HashMap<String, PersonStatus>();
+	public static Map<String, String> weaponClass = new HashMap<String, String>(4);
 	public static void update() {
 		String response = HttpUtil.get("equip.php");
 		PersonStatusParser.parse(response);
-	}
-	public static void equipItem(MyItem t) {
-		HttpUtil.get("equip.php");
-		HttpUtil.get("equip_sw.php?goto=show&type=its&wrap=" + t.getPosition());
-		FakeSleepUtil.sleep(1, 2);
-		HttpUtil.get("equip_ep.php?type=its&wrap=" + t.getPosition());
-		update();
 	}
 	public static void equipWeapon(MyWeapon myWeapon) {
 		String position = myWeapon.getPosition();
 		HttpUtil.get("equip_sw.php?goto=show&type=wep&wrap=" + position);
 		HttpUtil.get("equip_ep.php?type=wep&wrap=" + position);
 		update();
+	}
+	public static Item getBestStaff() {
+		if(!JobService.canUseStaff()) {
+			return null;
+		}
+		if(!weaponClass.containsKey("杖")) {
+			return null;
+		}
+		String staffClass;
+		if(weaponClass.get("杖").charAt(0) < 'C' || weaponClass.get("杖").charAt(0) == 'S') {
+			staffClass = "C";
+		} else {
+			staffClass = weaponClass.get("杖");
+		}
+		return Item.valueOf(staffClass + "杖");
 	}
 }

@@ -30,16 +30,9 @@ public class MyStatus {
 	public static class MyItem {
 		public static final Map<String, String> lookup = new HashMap<String, String>();
 		static {
-			lookup.put("aaaa", "伤药");
-			lookup.put("aaab", "万灵药");
-			lookup.put("aaac", "圣水");
-			lookup.put("aaaf", "铁丝");
-			lookup.put("aaag", "伤药");
-			lookup.put("aaah", "万灵药");
-			lookup.put("aaai", "圣水");
-			lookup.put("eaaa", "回复之杖");
-			lookup.put("eaab", "治疗之杖");
-			lookup.put("eaac", "痊愈之杖");
+			for(Item i: Item.values()) {
+				lookup.put(i.getCode(), i.getName());
+			}
 		}
 		private String position;
 		private String name;

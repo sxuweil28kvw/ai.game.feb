@@ -69,7 +69,7 @@ public class MercenaryService {
 					i--;
 				} else {
 					rename(m.getId(), "苗");
-//					trainMercenary(m.getId());
+					trainMercenary(m.getId());
 				}
 			}
 			MercenaryService.update();

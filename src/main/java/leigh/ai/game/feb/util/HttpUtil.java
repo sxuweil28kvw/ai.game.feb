@@ -36,6 +36,10 @@ public class HttpUtil {
 	}
 	private static Logger logger = LoggerFactory.getLogger(HttpUtil.class);
 	
+	public static void setHc(CloseableHttpClient hc) {
+		HC = hc;
+	}
+	
 	public static String get(String url) {
 		return get(url, logger);
 	}
@@ -116,9 +120,6 @@ public class HttpUtil {
 				post.setEntity(new UrlEncodedFormEntity(nvps, "utf8"));
 				response = HC.execute(post);
 				result = EntityUtils.toString(response.getEntity(), "utf8");
-				if(logger.isDebugEnabled()) {
-					logger.debug("url=" + url + ",,,,,,response=" + result);
-				}
 				break;
 			} catch (IOException e) {
 				LogUtil.errorStackTrace(logger, e);
