@@ -10,6 +10,7 @@ import leigh.ai.game.feb.service.multiAccount.Account;
 import leigh.ai.game.feb.service.raid.RaidStopReason;
 import leigh.ai.game.feb.service.status.Item;
 import leigh.ai.game.feb.service.status.MyStatus.MyItem;
+import leigh.ai.game.feb.service.status.PersonStatus;
 import leigh.ai.game.feb.util.HttpUtil;
 
 public class TeamRaidBiz {
@@ -132,24 +133,27 @@ public class TeamRaidBiz {
 			}
 			
 			if(whoEngagedFirstEnemy == -1) {
-				MultiAccountService.activate(0);
+				MultiAccountService.activate(battlePerson);
 				do {
 					RaidService.exit();
 					MoveService.enterTower();
-					while(RaidService.myPosition < firstEnemyPosition) {
-						RaidService.move();
-					}
+					RaidService.moveNoBattleUntil(-2, firstEnemyPosition);
 				} while (RaidService.myPosition > firstEnemyPosition);
-			} else if(whoEngagedFirstEnemy > 0) {
+			} else if(whoEngagedFirstEnemy != battlePerson) {
 				MultiAccountService.activate(whoEngagedFirstEnemy);
 				if(PersonStatusService.AP < 50) {
 					RaidService.addAp();
 				}
 				MultiAccountService.askForHelp();
 				PersonStatusService.AP -= 50;
-				MultiAccountService.activate(0);
+				MultiAccountService.activate(battlePerson);
 			} else {
-				MultiAccountService.activate(0);
+				MultiAccountService.activate(battlePerson);
+				if(PersonStatusService.AP < 50) {
+					RaidService.addAp();
+				}
+				MultiAccountService.askForHelp();
+				PersonStatusService.AP -= 50;
 			}
 			
 			RaidStopReason rsr = RaidService.raidBattle();
@@ -160,13 +164,28 @@ public class TeamRaidBiz {
 				case noWeapon:
 					int location = PersonStatusService.currentLocation, position = RaidService.myPosition;
 					RaidService.exit();
+					MoveService.moveTo(1113);
 					RaidService.repairAllWeapons();
 					RaidService.ensureHolywaterOutside();
 					BattleService.buyMedicine();
 					MoveService.enterTower();
 					RaidService.moveNoBattleUntil(location, position);
 					if(RaidService.myPosition > position) {
-						
+						for(int i = 0; i < MultiAccountService.status.size(); i++) {
+							if(i == battlePerson) {
+								continue;
+							}
+							PersonStatus ps = MultiAccountService.status.get(i);
+							if(ps.getRaidMapPosition() == position) {
+								MultiAccountService.activate(i);
+								if(PersonStatusService.AP < 50) {
+									RaidService.addAp();
+								}
+								MultiAccountService.askForHelp();
+								PersonStatusService.AP -= 50;
+								MultiAccountService.activate(battlePerson);
+							}
+						}
 					}
 					break;
 				default:
@@ -179,11 +198,16 @@ public class TeamRaidBiz {
 		}
 		
 		for(int i = 0; i < accounts.length; i++) {
+			if(i == battlePerson) {
+				continue;
+			}
 			MultiAccountService.activate(i);
 			RaidService.moveNoBattleUntil(6);
 			String laofanSaid = HttpUtil.get("npc.php?npcid=090");
 			if(laofanSaid.contains("真相是什么")) {
 				HttpUtil.get("npc.php?npcid=090&act=Q5_13");
+			} else {
+				logger.warn("{}老范对话错误，请检查任务线", accounts[i].getU());
 			}
 		}
 		
@@ -194,46 +218,51 @@ public class TeamRaidBiz {
 			MultiAccountService.activate(i);
 			RaidService.moveNoBattleUntil(6);
 			String laofanSaid = HttpUtil.get("npc.php?npcid=090");
-			if(laofanSaid.contains("我加入你")) {
-				if(PersonStatusService.items.size() == 5) {
-					for(MyItem t: PersonStatusService.items) {
-						if(t.getName().equals(Item.小圣水.getName())
-								|| t.getName().equals(Item.小伤药.getName())
-								|| t.getName().equals(Item.小万灵.getName())
-								|| t.getName().equals(Item.E杖.getName())
-								|| t.getName().equals(Item.D杖.getName())
-								|| t.getName().equals(Item.C杖.getName())) {
-							ItemService.throwItem(t);
-						}
-					}
-				}
-				
-				List<MyItem> formerItems = new ArrayList<MyItem>(5);
-				formerItems.addAll(PersonStatusService.items);
-				String joinLaofan = HttpUtil.get("npc.php?npcid=090&act=Q5_14");
-				if(joinLaofan.contains("道具已满")) {
-					logger.error("{}道具已满", accounts[i].getU());
-					continue;
-				}
-				PersonStatusService.update();
+			
+			if(!laofanSaid.contains("我加入你")) {
+				logger.warn("{}老范对话错误，请检查任务线", accounts[i].getU());
+				continue;
+			}
+			if(PersonStatusService.items.size() == 5) {
 				for(MyItem t: PersonStatusService.items) {
-					boolean formerExists = false;
-					for(MyItem former: formerItems) {
-						if(former.getName().equals(t.getName())) {
-							formerExists = true;
-							break;
-						}
+					if(t.getName().equals(Item.小圣水.getName())
+							|| t.getName().equals(Item.小伤药.getName())
+							|| t.getName().equals(Item.小万灵.getName())
+							|| t.getName().equals(Item.E杖.getName())
+							|| t.getName().equals(Item.D杖.getName())
+							|| t.getName().equals(Item.C杖.getName())) {
+						ItemService.throwItem(t);
 					}
-					if(!formerExists) {
-						ItemService.useItem(t);
-						RaidService.exit();
+				}
+			}
+			
+			List<MyItem> formerItems = new ArrayList<MyItem>(5);
+			formerItems.addAll(PersonStatusService.items);
+			String joinLaofan = HttpUtil.get("npc.php?npcid=090&act=Q5_14");
+			if(joinLaofan.contains("道具已满")) {
+				logger.error("{}道具已满", accounts[i].getU());
+				continue;
+			}
+			PersonStatusService.update();
+			for(MyItem t: PersonStatusService.items) {
+				boolean formerExists = false;
+				for(MyItem former: formerItems) {
+					if(former.getName().equals(t.getName())) {
+						formerExists = true;
 						break;
 					}
+				}
+				if(!formerExists) {
+					ItemService.useItem(t);
+					RaidService.exit();
+					break;
 				}
 			}
 		}
 		
 		MultiAccountService.activate(battlePerson);
+		//TODO:杀死老范完成疑团任务
+		
 		
 		for(int i = 0; i < accounts.length; i++) {
 			MultiAccountService.activate(i);
