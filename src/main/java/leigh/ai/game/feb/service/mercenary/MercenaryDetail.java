@@ -11,6 +11,7 @@ public class MercenaryDetail {
 	private int def;
 	private int prt;
 	private int con;
+	private MercenaryJob job;
 	public int getLevel() {
 		return level;
 	}
@@ -98,5 +99,11 @@ public class MercenaryDetail {
 	}
 	public void setCon(int con) {
 		this.con = con;
+	}
+	public MercenaryJob getJob() {
+		return job;
+	}
+	public void setJob(MercenaryJob job) {
+		this.job = job;
 	}
 }

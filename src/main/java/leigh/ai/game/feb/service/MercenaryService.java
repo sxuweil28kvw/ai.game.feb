@@ -11,6 +11,7 @@ import leigh.ai.game.feb.parsers.MercenaryParser;
 import leigh.ai.game.feb.parsers.ParserExceptionHandler;
 import leigh.ai.game.feb.service.mercenary.Mercenary;
 import leigh.ai.game.feb.service.mercenary.MercenaryDetail;
+import leigh.ai.game.feb.service.mercenary.MercenaryJob;
 import leigh.ai.game.feb.service.mercenary.MercenaryStatus;
 import leigh.ai.game.feb.util.HttpUtil;
 
@@ -64,12 +65,23 @@ public class MercenaryService {
 				if(dtl.getLevel() > 1) {
 					continue;
 				}
-				if(dtl.getPwr() < 4 || dtl.getSpd() < 4 || dtl.getDef() < 4 || dtl.getPrt() < 4 || dtl.getMaxHp() < 17) {
-					fireMercenary(m.getId());
-					i--;
+				if(dtl.getJob() == null) {
+					if(dtl.getPwr() < 4 || dtl.getSpd() < 4 || dtl.getDef() < 4 || dtl.getPrt() < 4 || dtl.getMaxHp() < 17) {
+						fireMercenary(m.getId());
+						i--;
+					} else {
+						rename(m.getId(), "苗");
+						trainMercenary(m.getId());
+					}
 				} else {
-					rename(m.getId(), "苗");
-					trainMercenary(m.getId());
+					MercenaryJob job = dtl.getJob();
+					if(dtl.getPwr() < job.getMinPwr() || dtl.getSpd() < job.getMinSpd() || dtl.getDef() < job.getMinDef() || dtl.getPrt() < job.getMinprt() || dtl.getMaxHp() < job.getMinHp()) {
+						fireMercenary(m.getId());
+						i--;
+					} else {
+						rename(m.getId(), "苗");
+						trainMercenary(m.getId());
+					}
 				}
 			}
 			MercenaryService.update();
@@ -99,31 +111,7 @@ public class MercenaryService {
 		logger.debug("解雇了一个佣兵。");
 	}
 	public static MercenaryDetail queryDetail(int id) {
-		MercenaryDetail dtl = new MercenaryDetail();
 		String response = HttpUtil.get("soldier_co.php?goto=showsol&soldier=" + id);
-		try {
-			Element tbody = Jsoup.parse(response).body().child(0).child(0);
-			String levelString = tbody.child(1).child(0).html().split(":")[1];
-			String[] levelsParts = levelString.split("%");
-			dtl.setLevel((Integer.parseInt(levelsParts[0]) + Integer.parseInt(levelsParts[1].split("%")[0])) / 5);
-			String hpStr = tbody.child(1).child(1).html().split(":")[1];
-			dtl.setHp(Integer.parseInt(hpStr.split("/")[0]));
-			dtl.setMaxHp(Integer.parseInt(hpStr.split("/")[1]));
-			dtl.setPwr(Integer.parseInt(tbody.child(3).child(0).html().split(":")[1]));
-			dtl.setAgi(Integer.parseInt(tbody.child(3).child(1).html().split(":")[1]));
-			dtl.setSpd(Integer.parseInt(tbody.child(3).child(2).html().split(":")[1]));
-			dtl.setLck(Integer.parseInt(tbody.child(3).child(3).html().split(":")[1]));
-			dtl.setDef(Integer.parseInt(tbody.child(4).child(0).html().split(":")[1]));
-			dtl.setPrt(Integer.parseInt(tbody.child(4).child(1).html().split(":")[1]));
-			dtl.setCon(Integer.parseInt(tbody.child(4).child(2).html().split(":")[1]));
-			if(logger.isDebugEnabled()) {
-				logger.debug("佣兵属性：" + dtl.getMaxHp() + "HP," + dtl.getPwr() + "力"
-						+ dtl.getAgi() + "技" + dtl.getSpd() + "速" + dtl.getDef() + "防"
-						+ dtl.getPrt() + "魔防" + dtl.getCon() + "体格");
-			}
-		} catch(Exception e) {
-			ParserExceptionHandler.warn(e, response, "解析佣兵详情失败！");
-		}
-		return dtl;
+		return MercenaryParser.parseDetail(response);
 	}
 }
