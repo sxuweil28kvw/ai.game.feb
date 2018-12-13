@@ -541,7 +541,7 @@ public class RaidBiz {
 		
 		LoginService.login(uVlk, pVlk);
 		
-		RaidService.forceMove();
+		RaidService.moveNoBattleUntil(24);
 		
 		String selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
 		List<String> summoners = NpcParser.parseSelenaSummoners(selenaSaid);
@@ -633,7 +633,7 @@ public class RaidBiz {
 				break;
 			}
 			
-			RaidService.forceMove();
+			RaidService.moveNoBattleUntil(24);
 			selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
 			summoners = NpcParser.parseSelenaSummoners(selenaSaid);
 		}
@@ -744,7 +744,7 @@ public class RaidBiz {
 	private static void battleTa6() {
 		BattleInfo battleInfo = null;
 		w6:
-			while(RaidService.myPosition < 23) {
+			while(RaidService.myPosition < 22) {
 				RaidService.move();
 				RaidMapType mapType = RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition);
 				if(mapType.equals(RaidMapType.enemy) || mapType.equals(RaidMapType.stopingEnemy)) {
