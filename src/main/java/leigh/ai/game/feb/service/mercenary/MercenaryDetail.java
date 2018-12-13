@@ -106,4 +106,10 @@ public class MercenaryDetail {
 	public void setJob(MercenaryJob job) {
 		this.job = job;
 	}
+	public String toString() {
+		return new StringBuilder()
+				.append(job.name()).append("[").append(hp).append("HP,").append(pwr).append("力")
+				.append(spd).append("速").append(def).append("防").append(prt).append("抗]")
+				.toString();
+	}
 }

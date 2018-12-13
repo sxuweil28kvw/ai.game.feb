@@ -71,6 +71,7 @@ public class MercenaryService {
 						i--;
 					} else {
 						rename(m.getId(), "苗");
+						logger.debug("挑到苗子：{}", dtl);
 						trainMercenary(m.getId());
 					}
 				} else {
@@ -80,13 +81,14 @@ public class MercenaryService {
 						i--;
 					} else {
 						rename(m.getId(), "苗");
+						logger.debug("挑到苗子：{}", dtl);
 						trainMercenary(m.getId());
 					}
 				}
 			}
 			MercenaryService.update();
 			if(PersonStatusService.mahua < mahuaLeft) {
-				System.out.println("没有麻花了");
+				logger.warn("没有麻花了");
 				return;
 			}
 		}

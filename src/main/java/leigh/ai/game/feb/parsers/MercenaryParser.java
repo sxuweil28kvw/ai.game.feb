@@ -13,6 +13,7 @@ import leigh.ai.game.feb.service.mercenary.MercenaryJob;
 import leigh.ai.game.feb.service.mercenary.MercenaryStatus;
 
 public class MercenaryParser {
+	@SuppressWarnings("unused")
 	private static Logger logger = LoggerFactory.getLogger(MercenaryParser.class);
 
 	public static void parseOuterFrame(String str) {
@@ -50,11 +51,6 @@ public class MercenaryParser {
 			dtl.setDef(Integer.parseInt(tbody.child(4).child(0).html().split(":")[1]));
 			dtl.setPrt(Integer.parseInt(tbody.child(4).child(1).html().split(":")[1]));
 			dtl.setCon(Integer.parseInt(tbody.child(4).child(2).html().split(":")[1]));
-			if(logger.isDebugEnabled()) {
-				logger.debug("佣兵属性：" + dtl.getMaxHp() + "HP," + dtl.getPwr() + "力"
-						+ dtl.getAgi() + "技" + dtl.getSpd() + "速" + dtl.getDef() + "防"
-						+ dtl.getPrt() + "魔防" + dtl.getCon() + "体格");
-			}
 		} catch(Exception e) {
 			ParserExceptionHandler.warn(e, src, "解析佣兵详情失败！");
 		}
