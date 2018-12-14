@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import leigh.ai.game.feb.parsers.BankParser;
+import leigh.ai.game.feb.parsers.ItemParser;
 import leigh.ai.game.feb.parsers.ItemShopParser;
 import leigh.ai.game.feb.parsers.ParserExceptionHandler;
-import leigh.ai.game.feb.parsers.PersonStatusParser;
 import leigh.ai.game.feb.parsers.WeaponShopParser;
 import leigh.ai.game.feb.service.map.MapPath;
 import leigh.ai.game.feb.service.map.Traffic;
@@ -153,7 +153,7 @@ public class FacilityService {
 			MoveService.moveTo(location);
 		}
 		ItemShopParser.afterBuy(HttpUtil.get("shopits_updata.php?goto=buy&buytype=0&item=" + itemcode));
-		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
+		ItemParser.itemsAfterUse(HttpUtil.get("useitem.php"));
 		logger.debug("购买了" + MyItem.lookup.get(itemcode));
 	}
 	public static int queryBankSlots() {
@@ -174,7 +174,7 @@ public class FacilityService {
 		}
 		HttpUtil.get("shopbanka_updata.php?goto=sell&type=item&wrap=" + position);
 		BankParser.parseBankStorage(HttpUtil.get("shopbanka_wi.php?type=i"));
-		PersonStatusParser.itemsAfterUse("useitem.php");
+		ItemParser.itemsAfterUse("useitem.php");
 		return true;
 	}
 	public static boolean saveWeaponToBank(MyWeapon w) {
@@ -285,7 +285,7 @@ public class FacilityService {
 		HttpUtil.get("shopits_co.php?goto=sell&wrap=" + t.getPosition());
 		String sellResponse = HttpUtil.get("shopits_updata.php?goto=sell&wrap=" + t.getPosition());
 		PersonStatusService.money = Integer.parseInt(sellResponse.split("nowmoney','", 2)[1].split("'", 2)[0]);
-		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
+		ItemParser.itemsAfterUse(HttpUtil.get("useitem.php"));
 		if(logger.isDebugEnabled()) {
 			logger.debug("出售了" + t.getName());
 		}

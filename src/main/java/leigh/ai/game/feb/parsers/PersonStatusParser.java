@@ -84,7 +84,6 @@ public class PersonStatusParser {
 			PersonStatusService.money = Integer.parseInt(moneyTable.child(0).child(0).child(0).html().substring(2));
 			PersonStatusService.mahua = Integer.parseInt(moneyTable.child(0).child(0).child(1).html().substring(2));
 		} catch(Exception e) {
-			e.printStackTrace();
 			ParserExceptionHandler.handle(e, str, "解析个人界面失败！");
 		}
 	}
@@ -92,25 +91,6 @@ public class PersonStatusParser {
 	public static void parseAfterUseItem(String str) {
 		PersonStatusService.HP = Integer.parseInt(str.split("'j_hp','", 2)[1].split("'", 2)[0]);
 		PersonStatusService.AP = Integer.parseInt(str.split("'j_ap','", 2)[1].split("'", 2)[0]);
-	}
-
-	/**********************
-	 * 
-	 * 解析useitem.php的返回结果。
-	 * 
-	 * @param items
-	 */
-	public static void itemsAfterUse(String items) {
-		String[] spl = items.split("onmouseover=\"itsinfo\\('");
-		PersonStatusService.items = new ArrayList<MyItem>(spl.length - 1);
-		for(int i = 1; i < spl.length; i++) {
-			MyItem t = new MyItem();
-			String[] splspl = spl[i].split("剩余", 2);
-			t.setName(splspl[0]);
-			t.setAmountLeft(Integer.parseInt(splspl[1].split("'", 2)[0]));
-			t.setPosition(spl[i].split("wrap=", 2)[1].split("'", 2)[0]);
-			PersonStatusService.items.add(t);
-		}
 	}
 
 	/*******************

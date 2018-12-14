@@ -19,11 +19,13 @@ public class TeamRaidBiz {
 	public static void helpLaofan(String[] args) {
 		boolean[] isZhenshi = parseIsZhenshi(args[0]);
 		Account[] accounts = new Account[isZhenshi.length + 1];
+		String[] upperJobs = new String[isZhenshi.length];
 		Account dahao = new Account(args[1], args[2]);
 		accounts[0] = dahao;
-		for(int i = 3; i < args.length; i += 2) {
+		for(int i = 3; i < args.length; i += 3) {
 			Account xiaohao = new Account(args[i], args[i + 1]);
-			accounts[i / 2] = xiaohao;
+			accounts[i / 3] = xiaohao;
+			upperJobs[i / 3 - 1] = args[i + 2];
 		}
 		MultiAccountService.login(accounts);
 		
@@ -253,7 +255,7 @@ public class TeamRaidBiz {
 					}
 				}
 				if(!formerExists) {
-					ItemService.useItem(t);
+					ItemService.useJobChangeItem(t, upperJobs[i - 1]);
 					RaidService.exit();
 					break;
 				}

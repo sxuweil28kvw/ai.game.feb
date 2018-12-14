@@ -11,6 +11,7 @@ import leigh.ai.game.feb.business.TagangBiz;
 import leigh.ai.game.feb.service.LoginService;
 import leigh.ai.game.feb.service.MapService;
 import leigh.ai.game.feb.service.MoveService;
+import leigh.ai.game.feb.service.TeamRaidBiz;
 import leigh.ai.game.feb.service.WabaoService;
 
 public class Assembled {
@@ -19,7 +20,7 @@ public class Assembled {
 			printUsage();
 			System.exit(0);
 		}
-		String action = args[0];
+		String action = args[0].toLowerCase();
 		args = Arrays.copyOfRange(args, 1, args.length);
 		switch(action) {
 			case "tagang":
@@ -107,6 +108,9 @@ public class Assembled {
 				break;
 			case "tagangshendian":
 				TagangBiz.tagangShrine(args);
+				break;
+			case "helplaofan":
+				TeamRaidBiz.helpLaofan(args);
 				break;
 			default:
 				System.out.println("不认识的参数！");

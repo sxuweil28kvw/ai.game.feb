@@ -1,6 +1,7 @@
 package leigh.ai.game.feb.service;
 
 import leigh.ai.game.feb.parsers.BattleResultParser;
+import leigh.ai.game.feb.parsers.ItemParser;
 import leigh.ai.game.feb.parsers.ParserExceptionHandler;
 import leigh.ai.game.feb.parsers.PersonStatusParser;
 import leigh.ai.game.feb.service.FacilityService.FacilityType;
@@ -141,7 +142,7 @@ public class BattleService {
 	}
 	public static void useStaff(MyItem t) {
 		PersonStatusParser.parseAfterUseItem(HttpUtil.get("useitem_heal.php?goto=useitem&wrap=" + t.getPosition()));
-		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
+		ItemParser.itemsAfterUse(HttpUtil.get("useitem.php"));
 		logger.debug("使用了" + t.getName());
 	}
 	public static void buyMedicine() {
@@ -162,7 +163,7 @@ public class BattleService {
 				FacilityService.buyItem("aaaa");
 			}
 		}
-		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
+		ItemParser.itemsAfterUse(HttpUtil.get("useitem.php"));
 	}
 	public static boolean buyHolywater() {
 		if(PersonStatusService.items.size() == 5) {

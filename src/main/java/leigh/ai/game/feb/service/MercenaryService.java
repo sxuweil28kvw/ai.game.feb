@@ -110,7 +110,6 @@ public class MercenaryService {
 		HttpUtil.get("soldier_co.php?goto=delete&soldier=" + id);
 		HttpUtil.get("soldier_updata.php?goto=delete&soldier=" + id);
 		MercenaryParser.parseSoldierTable(HttpUtil.get("soldier_table.php"));
-		logger.debug("解雇了一个佣兵。");
 	}
 	public static MercenaryDetail queryDetail(int id) {
 		String response = HttpUtil.get("soldier_co.php?goto=showsol&soldier=" + id);

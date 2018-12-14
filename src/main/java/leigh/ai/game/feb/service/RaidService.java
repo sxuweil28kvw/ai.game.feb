@@ -18,8 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import leigh.ai.game.feb.parsers.BattleResultParser;
+import leigh.ai.game.feb.parsers.ItemParser;
 import leigh.ai.game.feb.parsers.ParserExceptionHandler;
-import leigh.ai.game.feb.parsers.PersonStatusParser;
 import leigh.ai.game.feb.parsers.RaidParser;
 import leigh.ai.game.feb.parsers.WeaponShopParser;
 import leigh.ai.game.feb.service.FacilityService.FacilityType;
@@ -220,7 +220,7 @@ public class RaidService {
 		} catch(Exception e) {
 			ParserExceptionHandler.handle(e, useStaffResult, "解析副本用杖结果错误：");
 		}
-		PersonStatusParser.itemsAfterUse(HttpUtil.get("useitem.php"));
+		ItemParser.itemsAfterUse(HttpUtil.get("useitem.php"));
 	}
 	public static boolean addAp() {
 		for(int i = 0; i < PersonStatusService.items.size(); i++) {

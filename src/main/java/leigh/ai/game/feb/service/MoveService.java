@@ -138,6 +138,7 @@ public class MoveService {
 		HttpUtil.get("move.php?display=1");
 		PersonStatusService.currentLocation = -1;
 		RaidService.myPosition = 0;
+		FakeSleepUtil.sleep(2, 3);
 		logger.debug("进入威鲁尼塔1层");
 		return true;
 	}
@@ -156,6 +157,7 @@ public class MoveService {
 		HttpUtil.get("move.php?display=1");
 		PersonStatusService.currentLocation = -floor;
 		RaidService.myPosition = 0;
+		FakeSleepUtil.sleep(2, 3);
 		logger.info("应该进入了威鲁尼塔{}层", floor);
 		return true;
 	}

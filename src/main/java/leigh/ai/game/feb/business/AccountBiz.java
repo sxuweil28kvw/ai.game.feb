@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import leigh.ai.game.feb.parsers.PersonStatusParser;
+import leigh.ai.game.feb.parsers.ItemParser;
 import leigh.ai.game.feb.service.BattleService;
 import leigh.ai.game.feb.service.FacilityService;
 import leigh.ai.game.feb.service.FacilityService.FacilityType;
@@ -64,7 +64,7 @@ public class AccountBiz {
 			HttpUtil.get("newbit.php");
 		}
 		HttpUtil.get("useitem_co.php?goto=useitem&wrap=E");
-		PersonStatusParser.itemsAfterUse("useitem.php");
+		ItemParser.itemsAfterUse("useitem.php");
 		MissionService.newbie();
 		MoveService.moveToFacility(FacilityType.weaponshopE);
 		FacilityService.buyWeapon(JobService.eWeaponCode());
