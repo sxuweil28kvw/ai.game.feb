@@ -1,0 +1,26 @@
+accounts:
+ - {u: 鸟居江利子, p: kk82liewuxux}
+ - {u: 岛津由乃, p: kk82liewuxux}
+ - {u: 细川可南子, p: kk82liewuxux}
+ - {u: 水野蓉子, p: kk82liewuxux}
+ - {u: 小笠原祥子, p: kk82liewuxux}
+
+healer: 0
+
+mapBattles:
+ -10:
+  1:
+    battlePerson: 1
+    weaponNeeded:
+     - 勇者之剑
+    weaponAmountNeeded: 100
+    turns: 2
+    healingHp: 35
+  2:
+    battlePerson: 4
+    weaponNeeded:
+     - 勇者之斧
+    weaponAmountNeeded: 40
+    turns: 1
+    healingHp: 35
+ -11:
