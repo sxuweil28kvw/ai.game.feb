@@ -9,7 +9,12 @@ public class JobService {
 				|| job.equals("圣女")
 				|| job.equals("司祭")
 				|| job.equals("贤者")
-				|| job.equals("德鲁依")) {
+				|| job.equals("德鲁依")
+				|| job.equals("女武神")
+				|| job.equals("大司祭")
+				|| job.equals("大贤者")
+				|| job.equals("咒术师")
+				) {
 			return true;
 		}
 		return false;
