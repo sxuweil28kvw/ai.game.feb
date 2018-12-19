@@ -1,10 +1,15 @@
 package leigh.ai.game.feb.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import leigh.ai.game.feb.parsers.MoveParser;
+import leigh.ai.game.feb.parsers.NpcParser;
 import leigh.ai.game.feb.service.battle.BattleInfo;
 import leigh.ai.game.feb.util.HttpUtil;
 
 public class MissionService {
+	private static final Logger logger = LoggerFactory.getLogger(MissionService.class);
 	public static void newbie() {
 		MoveService.moveTo(1102);
 		HttpUtil.get("npc.php?npcid=117");
@@ -191,5 +196,39 @@ public class MissionService {
 		HttpUtil.get("npc.php?npcid=125");
 		HttpUtil.get("npc.php?npcid=125&act=Q5_12");
 		MoveService.moveTo(1194);
+	}
+	
+	public static void memberCard() {
+		MoveService.moveTo(1198);//贸易港
+		String leinakeSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=127"));
+		if(!leinakeSaid.contains("庞大的债务")) {
+			logger.error("没有领到会员卡任务！请检查前置条件");
+			return;
+		}
+		HttpUtil.get("npc.php?npcid=127&act=Q7_ON");
+		MoveService.moveTo(1180);//罗斯顿王宫
+		String laqieerSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=125"));
+		if(!laqieerSaid.contains("雷纳克的债务")) {
+			logger.error("拉切尔对话中没有雷纳克的债务选项！");
+			return;
+		}
+		HttpUtil.get("npc.php?npcid=125&act=Q7_1");
+		
+		MoveService.moveTo(1198);
+		leinakeSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=127"));
+		if(!leinakeSaid.contains("讨债失败")) {
+			logger.error("雷纳克对话中没有讨债失败选项！");
+			return;
+		}
+		HttpUtil.get("npc.php?npcid=127&act=Q7_2");
+		
+		MoveService.moveTo(1107);//拉克村
+		String meimiSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=108"));
+		if(!meimiSaid.contains("科曼的行踪")) {
+			logger.error("梅米对话中没有科曼的行踪选项！");
+			return;
+		}
+		HttpUtil.get("npc.php?npcid=108&act=Q7_4");
+		
 	}
 }
