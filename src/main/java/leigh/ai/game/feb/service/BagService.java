@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class BagService {
 	private static Logger logger = LoggerFactory.getLogger(BagService.class);
-	public static String[] resourceNameList = {"木材","金属","蘑菇","骷髅","腐牙","魔眼","马蹄","毒液","利爪","魔翼","咒血","蛇头","龙皮"};
+	public static String[] resourceNameList = {"木材","金属","蘑菇","骷髅","腐牙","魔眼","马蹄","毒液","利爪","魔翼","咒血","蛇头","龙皮","魔晶","奥沙"};
 	public static Map<Integer, Integer> resourceAmount = new HashMap<Integer, Integer>(resourceNameList.length);
 	public static void update() {
 		String stuff = HttpUtil.get("stuff.php");

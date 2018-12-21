@@ -276,6 +276,7 @@ public class RaidService {
 			logger.info("宝箱开到" + chestItem + ", 分配给了" + username);
 		}
 		addDeadPosition();
+		FakeSleepUtil.sleep(2, 3);
 	}
 	public static void addDeadPosition() {
 		if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {

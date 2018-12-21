@@ -1,4 +1,4 @@
-package leigh.ai.game.feb.service;
+package leigh.ai.game.feb.business;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import leigh.ai.game.feb.dto.team.ReceivingTeamInviteException;
+import leigh.ai.game.feb.dto.team.Team;
+import leigh.ai.game.feb.service.BattleService;
+import leigh.ai.game.feb.service.ItemService;
+import leigh.ai.game.feb.service.JobService;
+import leigh.ai.game.feb.service.LoginService;
+import leigh.ai.game.feb.service.MoveService;
+import leigh.ai.game.feb.service.MultiAccountService;
+import leigh.ai.game.feb.service.PersonStatusService;
+import leigh.ai.game.feb.service.RaidService;
+import leigh.ai.game.feb.service.TeamService;
 import leigh.ai.game.feb.service.multiAccount.Account;
 import leigh.ai.game.feb.service.raid.RaidStopReason;
 import leigh.ai.game.feb.service.status.Item;
@@ -279,4 +290,56 @@ public class TeamRaidBiz {
 		}
 		return result;
 	}
+	
+	/***********
+	 * 
+	 * team结成的仪式。
+	 * 
+	 * @param accounts
+	 * @param leaderIndex
+	 * @param login 是否需要先multi登录
+	 * 
+	 * @return 队长视角的Team。
+	 */
+	public static Team team(Account[] accounts, int leaderIndex, boolean login) {
+		if(login) {
+			MultiAccountService.login(accounts);
+		}
+		for(int i = 0; i < accounts.length; i++) {
+			MultiAccountService.activate(i);
+			Team myTeam = null;
+			try {
+				myTeam = TeamService.queryMyTeam();
+			} catch(ReceivingTeamInviteException e) {
+				TeamService.refuseInviting();
+			}
+			if(myTeam != null) {
+				if(PersonStatusService.currentLocation < 0) {
+					RaidService.exit();
+				}
+				TeamService.quitTeam(myTeam);
+			}
+		}
+		
+		MultiAccountService.activate(leaderIndex);
+		String teamName = TeamService.createTeam();
+		for(int i = 0; i < accounts.length; i++) {
+			if(i == leaderIndex) {
+				continue;
+			}
+			TeamService.invite(teamName, accounts[i].getU());
+		}
+		for(int i = 0; i < accounts.length; i++) {
+			if(i == leaderIndex) {
+				continue;
+			}
+			MultiAccountService.activate(i);
+			TeamService.acceptInvite(teamName);
+		}
+		MultiAccountService.activate(leaderIndex);
+		Team team = TeamService.queryMyTeam();
+		logger.info(team.toString());
+		return team;
+	}
+	
 }

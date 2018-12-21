@@ -6,6 +6,7 @@ import java.util.List;
 public class Team {
 	private String name;
 	private List<String> members = new ArrayList<String>(5);
+	private List<Integer> memberIds = new ArrayList<Integer>(5);
 	private byte leaderIndex;
 	public String getName() {
 		return name;
@@ -25,6 +26,12 @@ public class Team {
 	public void setLeaderIndex(byte leaderIndex) {
 		this.leaderIndex = leaderIndex;
 	}
+	public List<Integer> getMemberIds() {
+		return memberIds;
+	}
+	public void setMemberIds(List<Integer> memberIds) {
+		this.memberIds = memberIds;
+	}
 	public String toString() {
 		StringBuilder sb = new StringBuilder("队伍:");
 		sb.append(name).append('[');
@@ -33,7 +40,7 @@ public class Team {
 			if(i == leaderIndex) {
 				sb.append("☆");
 			}
-			sb.append(',');
+			sb.append('(').append(memberIds.get(i)).append("),");
 		}
 		sb.append(']');
 		return sb.toString();

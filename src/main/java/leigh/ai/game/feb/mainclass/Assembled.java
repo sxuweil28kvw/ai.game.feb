@@ -8,10 +8,10 @@ import leigh.ai.game.feb.business.MoveBiz;
 import leigh.ai.game.feb.business.RaidBiz;
 import leigh.ai.game.feb.business.ShuaBiz;
 import leigh.ai.game.feb.business.TagangBiz;
+import leigh.ai.game.feb.business.TeamRaidBiz;
 import leigh.ai.game.feb.service.LoginService;
 import leigh.ai.game.feb.service.MapService;
 import leigh.ai.game.feb.service.MoveService;
-import leigh.ai.game.feb.service.TeamRaidBiz;
 import leigh.ai.game.feb.service.WabaoService;
 
 public class Assembled {

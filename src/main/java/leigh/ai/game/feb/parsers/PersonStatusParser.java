@@ -74,11 +74,15 @@ public class PersonStatusParser {
 //				logger.debug("weaponClass:{}", PersonStatusService.weaponClass);
 //			}
 			
-			Element cardsTable = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(10).child(0).child(0);
-			PersonStatusService.halfCard = !cardsTable.child(0).child(1).child(0).hasAttr("style");
-			PersonStatusService.memberCard = !cardsTable.child(0).child(1).child(1).hasAttr("style");
-			PersonStatusService.goodCard = !cardsTable.child(0).child(2).child(0).hasAttr("style");
-			PersonStatusService.justiceCard = !cardsTable.child(0).child(2).child(1).hasAttr("style");
+			try {
+				Element cardsTable = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(10).child(0).child(0);
+				PersonStatusService.halfCard = !cardsTable.child(0).child(1).child(0).hasAttr("style");
+				PersonStatusService.memberCard = !cardsTable.child(0).child(1).child(1).hasAttr("style");
+				PersonStatusService.goodCard = !cardsTable.child(0).child(2).child(0).hasAttr("style");
+				PersonStatusService.justiceCard = !cardsTable.child(0).child(2).child(1).hasAttr("style");
+			} catch(Exception e) {
+				logger.warn("解析四张卡状态失败");
+			}
 			
 			Element moneyTable = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(8).child(0).child(0);
 			PersonStatusService.money = Integer.parseInt(moneyTable.child(0).child(0).child(0).html().substring(2));
