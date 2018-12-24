@@ -61,6 +61,10 @@ public class MercenaryParser {
 		MercenaryService.myMercenaries.clear();
 		try {
 			Document doc = Jsoup.parse(str);
+			if(doc.body().child(0).child(0).text().equals("")) {
+				logger.debug("一个佣兵也没有");
+				return;
+			}
 			Element tbody = doc.body().child(0).child(0).child(0);
 			for(Element tr: tbody.children()) {
 				String onclick = tr.child(0).child(0).attr("onClick");
