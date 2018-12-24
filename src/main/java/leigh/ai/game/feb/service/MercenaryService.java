@@ -40,6 +40,60 @@ public class MercenaryService {
 		MercenaryParser.parseOuterFrame(HttpUtil.get("soldier.php"));
 		MercenaryParser.parseSoldierTable(HttpUtil.get("soldier_table.php"));
 	}
+	
+	public static void mercenary3333() {
+		int training = 0;
+		int maxTrain = PersonStatusService.goodCard ? 15 : 10;
+		MercenaryService.update();
+		for(Mercenary m: myMercenaries) {
+			if(m.getStatus().equals(MercenaryStatus.train)) {
+				training++;
+			}
+		}
+		if(training >= maxTrain) {
+			return;
+		}
+		while(MercenaryService.num <= MercenaryService.limit - 10) {
+			Set<Integer> origin = new HashSet<Integer>(myMercenaries.size());
+			for(Mercenary m: myMercenaries) {
+				origin.add(m.getId());
+			}
+			FacilityService.mercenaryTen();
+			MercenaryService.update();
+			for(int i = 0; i < myMercenaries.size(); i++) {
+				Mercenary m = myMercenaries.get(i);
+				if(origin.contains(m.getId())) {
+					continue;
+				}
+				if(m.getStatus().equals(MercenaryStatus.train) || m.getStatus().equals(MercenaryStatus.guard)) {
+					continue;
+				}
+				MercenaryDetail dtl = queryDetail(m.getId());
+				if(dtl.getLevel() > 1) {
+					continue;
+				}
+				if(dtl.getPwr() < 3 || dtl.getSpd() < 3 || dtl.getDef() < 3 || dtl.getPrt() < 3 || dtl.getMaxHp() < 15) {
+					fireMercenary(m.getId());
+					i--;
+				} else {
+					rename(m.getId(), "良");
+					logger.debug("挑到次等苗：{}", dtl);
+					trainMercenary(m.getId());
+					training++;
+				}
+			}
+			if(training >= maxTrain - 1) {
+				logger.info("训练队列快满了！");
+				break;
+			}
+			if(PersonStatusService.mahua < 45) {
+				logger.info("没有麻花了！");
+				break;
+			}
+		}
+		logger.info("{}剩余麻花：{}", LoginService.username, PersonStatusService.mahua);
+	}
+	
 	public static void mercenaryBatch(int mahuaLeft) {
 		if(PersonStatusService.mahua < mahuaLeft) {
 			System.out.println("没有麻花了");
