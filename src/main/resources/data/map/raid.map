@@ -4,3 +4,4 @@
 -4:shop,chest,chest,chest,chest,door,empty,enemy,empty,enemy,empty,enemy,empty,enemy,empty,enemy,stopingNpc,door,empty,chest,stopingEnemy,stopingEnemy
 -5:stopingEnemy
 -6:empty,stopingEnemy,stopingEnemy,stopingEnemy,stopingEnemy,chest,stopingEnemy,stopingEnemy,stopingEnemy,stopingEnemy,chest,stopingEnemy,stopingEnemy,stopingEnemy,stopingEnemy,chest,stopingEnemy,stopingEnemy,stopingEnemy,stopingEnemy,chest,stopingEnemy,stopingEnemy,chest,stopingEnemy
+-9:empty,empty,enemy,enemy,stopingEnemy,enemy,enemy,stopingEnemy,stopingEnemy,stopingEnemy,door,stopingEnemy,chest

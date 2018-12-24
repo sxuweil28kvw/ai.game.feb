@@ -6,9 +6,11 @@ public class TestMultiAccount {
 
 	public static void main(String[] args) {
 		args = new String[] {
-				"01", "藤堂志摩子", "kk82liewuxux",
-				"艾莎", "13953539", "剑豪",
-				"艾雅", "13953539", "魔法骑士",
+				"1111", "张飞", "7777777",
+				"看门罗汉", "7777777", "司祭",
+				"降龙罗汉", "7777777", "司祭",
+				"伏虎罗汉", "7777777", "司祭",
+				"沉思罗汉", "7777777", "司祭",
 		};
 		TeamRaidBiz.helpLaofan(args);
 	}

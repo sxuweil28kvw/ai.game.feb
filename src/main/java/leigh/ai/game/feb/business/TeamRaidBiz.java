@@ -39,6 +39,7 @@ public class TeamRaidBiz {
 			upperJobs[i / 3 - 1] = args[i + 2];
 		}
 		MultiAccountService.login(accounts);
+		team(accounts, 0, false);
 		
 		int battlePerson = 0;
 		
@@ -342,4 +343,10 @@ public class TeamRaidBiz {
 		return team;
 	}
 	
+	public static void ruin(Account[] accounts, int healerIndex) {
+		team(accounts, healerIndex, true);
+		int battlePerson = 0;
+		MultiAccountService.activate(0);
+		ItemService.ensureItems(Item.铁丝, Item.天马的羽毛M);
+	}
 }
