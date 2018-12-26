@@ -14,8 +14,6 @@ import leigh.ai.game.feb.service.LoginService;
 import leigh.ai.game.feb.service.MissionService;
 import leigh.ai.game.feb.service.MoveService;
 import leigh.ai.game.feb.service.PersonStatusService;
-import leigh.ai.game.feb.service.battle.BattleInfo;
-import leigh.ai.game.feb.service.battle.BattleResult;
 import leigh.ai.game.feb.util.FakeSleepUtil;
 import leigh.ai.game.feb.util.HttpUtil;
 import leigh.ai.game.feb.util.UnicodeReader;
@@ -75,50 +73,8 @@ public class AccountBiz {
 	}
 
 	private static void lowerJobLevelUp() {
-		battleToLevel(12, 1103);
-		battleToLevel(20, 1126);
-	}
-	private static void battleToLevel(int level, int location) {
-		if(PersonStatusService.level >= level) {
-			return;
-		}
-		String item = "魔石的碎片";
-		int fullShards = 5;
-		BattleService.readyForBattle();
-		int shards = FacilityService.storeFullShards(item, fullShards);
-		int bankSlots = FacilityService.queryBankSlots();
-		while(PersonStatusService.level < level) {
-			MoveService.moveTo(location);
-			BattleInfo info = BattleService.fight(BattleService.searchUntilEnemy());
-			for(String s: info.getOtherInfo()) {
-				if(s.contains(item)) {
-					shards++;
-				}
-			}
-			PersonStatusService.update();
-			if(PersonStatusService.weapons.get(0).getAmountLeft() < 1) {
-				if(PersonStatusService.money < 2000) {
-					FacilityService.drawCash(19000);
-				}
-				FacilityService.repairWeapon(PersonStatusService.weapons.get(0));
-			}
-			if(info.getResult().equals(BattleResult.lose)) {
-				BattleService.selfHeal();
-			}
-			if(PersonStatusService.HP < PersonStatusService.maxHP * 0.4) {
-				BattleService.selfHeal();
-			}
-			if(PersonStatusService.AP < 10) {
-				BattleService.addAp();
-			}
-			MoveService.moveTo(location);
-			if(shards >= fullShards) {
-				FacilityService.storeFullShards(item, fullShards);
-				bankSlots--;
-				System.out.println("存" + item + "！仓库空位数：" + bankSlots);
-				shards = 0;
-			}
-		}
+		BattleService.battleToLevel(12, 1103);
+		BattleService.battleToLevel(20, 1126);
 	}
 	public static void yizhuan(String u, String p) {
 		LoginService.login(u, p);

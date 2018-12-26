@@ -93,7 +93,10 @@ public class Assembled {
 				AccountBiz.yizhuan(args[0], args[1]);
 				break;
 			case "zhaobing":
-				MercenaryBiz.pick(args[0], args[1], Integer.parseInt(args[2]));
+				MercenaryBiz.pickVeryGood(args[0], args[1], Integer.parseInt(args[2]));
+				break;
+			case "batchmoresoldiers":
+				MercenaryBiz.pickGood(args[0]);
 				break;
 			case "shendian":
 				LoginService.login(args[0], args[1]);

@@ -7,13 +7,18 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import leigh.ai.game.feb.service.LoginService;
+import leigh.ai.game.feb.service.PersonStatusService;
 import leigh.ai.game.feb.service.TagangMissionService;
 import leigh.ai.game.feb.service.WabaoService;
 import leigh.ai.game.feb.util.FakeSleepUtil;
 import leigh.ai.game.feb.util.UnicodeReader;
 
 public class TagangBiz {
+	private static final Logger logger = LoggerFactory.getLogger(TagangBiz.class);
 
 	public static void tagang(String[] args) {
 		if(args == null || args.length == 0) {
@@ -79,6 +84,7 @@ public class TagangBiz {
 			System.exit(1);
 		}
 		List<String[]> accounts = new LinkedList<String[]>();
+		LinkedList<Integer> mahua = new LinkedList<Integer>();
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new UnicodeReader(new FileInputStream(args[0]), "utf8"));
@@ -117,13 +123,16 @@ public class TagangBiz {
 				System.out.println(account[0] + " 领取塔港任务。");
 				LoginService.login(account[0], account[1]);
 				TagangMissionService.doOnlyMowu();
+				mahua.add(PersonStatusService.mahua);
 				LoginService.logout();
 			} catch(Exception e) {
 				e.printStackTrace();
 				System.out.println(account[0] + "做塔港时异常");
 			}
 		}
-		System.out.println("程序执行完毕。");
+		for(String[] account: accounts) {
+			logger.info("{}现有{}麻花.", account[0], mahua.removeFirst());
+		}
 	}
 
 	public static void tagangDesert(String[] args) {

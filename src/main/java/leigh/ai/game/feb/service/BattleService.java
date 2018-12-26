@@ -6,6 +6,7 @@ import leigh.ai.game.feb.parsers.ParserExceptionHandler;
 import leigh.ai.game.feb.parsers.PersonStatusParser;
 import leigh.ai.game.feb.service.FacilityService.FacilityType;
 import leigh.ai.game.feb.service.battle.BattleInfo;
+import leigh.ai.game.feb.service.battle.BattleResult;
 import leigh.ai.game.feb.service.map.MapPath;
 import leigh.ai.game.feb.service.map.Traffic;
 import leigh.ai.game.feb.service.status.MyStatus.MyItem;
@@ -192,5 +193,84 @@ public class BattleService {
 			FacilityService.buyItem("aaac");
 		}
 		return true;
+	}
+	public static void battleToLevel(int level, int location) {
+		if(PersonStatusService.level >= level) {
+			return;
+		}
+		String item = "魔石的碎片";
+		int fullShards = 5;
+		readyForBattle();
+		int shards = FacilityService.storeFullShards(item, fullShards);
+		int bankSlots = FacilityService.queryBankSlots();
+		while(PersonStatusService.level < level) {
+			MoveService.moveTo(location);
+			BattleInfo info = fight(searchUntilEnemy());
+			for(String s: info.getOtherInfo()) {
+				if(s.contains(item)) {
+					shards++;
+				}
+			}
+			PersonStatusService.update();
+			if(PersonStatusService.weapons.get(0).getAmountLeft() < 1) {
+				FacilityService.repairWeapon(PersonStatusService.weapons.get(0));
+			}
+			if(info.getResult().equals(BattleResult.lose)) {
+				selfHeal();
+			}
+			if(PersonStatusService.HP < PersonStatusService.maxHP * 0.4) {
+				selfHeal();
+			}
+			if(PersonStatusService.AP < 10) {
+				addAp();
+			}
+			MoveService.moveTo(location);
+			if(shards >= fullShards) {
+				FacilityService.storeFullShards(item, fullShards);
+				bankSlots--;
+				logger.info("存" + item + "！仓库空位数：" + bankSlots);
+				shards = 0;
+			}
+		}
+	}
+	
+	public static void killSomeEnemies(int enemyNum, int location) {
+		String item = "魔石的碎片";
+		int fullShards = 5;
+		readyForBattle();
+		int shards = FacilityService.storeFullShards(item, fullShards);
+		int bankSlots = FacilityService.queryBankSlots();
+		for(int num = 0; num < enemyNum;) {
+			MoveService.moveTo(location);
+			BattleInfo info = fight(searchUntilEnemy());
+			for(String s: info.getOtherInfo()) {
+				if(s.contains(item)) {
+					shards++;
+				}
+			}
+			PersonStatusService.update();
+			if(PersonStatusService.weapons.get(0).getAmountLeft() < 1) {
+				FacilityService.repairWeapon(PersonStatusService.weapons.get(0));
+			}
+			if(info.getResult().equals(BattleResult.lose)) {
+				selfHeal();
+			} else if(info.getResult().equals(BattleResult.win)) {
+				num++;
+			}
+			if(PersonStatusService.HP < PersonStatusService.maxHP * 0.4) {
+				selfHeal();
+			}
+			if(PersonStatusService.AP < 10) {
+				addAp();
+			}
+			MoveService.moveTo(location);
+			if(shards >= fullShards) {
+				FacilityService.storeFullShards(item, fullShards);
+				bankSlots--;
+				logger.info("存" + item + "！仓库空位数：" + bankSlots);
+				shards = 0;
+			}
+		}
+		logger.info("已杀死{}个敌人！", enemyNum);
 	}
 }

@@ -198,6 +198,28 @@ public class MissionService {
 		MoveService.moveTo(1194);
 	}
 	
+	public static void halfCard() {
+		MoveService.moveTo(1102);
+		String yifuliemuSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=115"));
+		if(!yifuliemuSaid.contains("我想去协助将军")) {
+			logger.error("没有接到半价卡任务！");
+			return;
+		}
+		HttpUtil.get("npc.php?npcid=115&act=Q1_ON");
+		//你自愿加入魔殿志愿军，首先你得去魔殿向塞思将军报道
+		
+		MoveService.moveTo(1188);
+		String saisiSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=102"));
+		if(!saisiSaid.contains("援军")) {
+			logger.error("塞思没有提到援军！");
+			return;
+		}
+		HttpUtil.get("npc.php?npcid=102&act=Q1_1");
+		//在魔殿杀死至少10只魔物，当然，如果你愿意，你可以杀死更多，应该可以获得更好的奖励<br>已杀死：0/10或50
+		
+		
+	}
+	
 	public static void memberCard() {
 		MoveService.moveTo(1198);//贸易港
 		String leinakeSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=127"));

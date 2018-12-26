@@ -7,18 +7,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import leigh.ai.game.feb.parsers.MercenaryParser;
-import leigh.ai.game.feb.parsers.ParserExceptionHandler;
 import leigh.ai.game.feb.service.mercenary.Mercenary;
 import leigh.ai.game.feb.service.mercenary.MercenaryDetail;
 import leigh.ai.game.feb.service.mercenary.MercenaryJob;
 import leigh.ai.game.feb.service.mercenary.MercenaryStatus;
 import leigh.ai.game.feb.util.HttpUtil;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*************
  * 佣兵相关
