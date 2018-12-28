@@ -357,6 +357,26 @@ public class RaidService {
 			switch(map.get(i)) {
 			case enemy:
 			case stopingEnemy:
+				if(!RaidService.deadEnemies.containsKey(location)) {
+					return i;
+				}
+				if(RaidService.deadEnemies.get(location).contains(i)) {
+					continue;
+				} else {
+					return i;
+				}
+			default:
+				continue;
+			}
+		}
+		return -1;
+	}
+	public static int firstEnemyChestDoorPosition(int location) {
+		List<RaidMapType> map = RaidService.raidMap.get(location);
+		for(int i = 0; i < map.size(); i++) {
+			switch(map.get(i)) {
+			case enemy:
+			case stopingEnemy:
 			case door:
 			case chest:
 				if(!RaidService.deadEnemies.containsKey(location)) {

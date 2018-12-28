@@ -364,7 +364,7 @@ public class TeamRaidBiz {
 		
 		List<RaidMapType> ruinMap = RaidService.raidMap.get(-9);
 		
-		int firstEnemyPosition = RaidService.firstEnemyPosition(-9);
+		int firstEnemyPosition = RaidService.firstEnemyChestDoorPosition(-9);
 		while(firstEnemyPosition >= 0 && firstEnemyPosition < 12) {
 			int whoEngagedFirstEnemy = -1;
 			for(int i = 0; i < accounts.length; i++) {
@@ -452,7 +452,7 @@ public class TeamRaidBiz {
 						firstEnemyPosition, ruinMap.get(firstEnemyPosition).name());
 				break;
 			}
-			firstEnemyPosition = RaidService.firstEnemyPosition(-9);
+			firstEnemyPosition = RaidService.firstEnemyChestDoorPosition(-9);
 		}
 	}
 
