@@ -3,6 +3,9 @@ package leigh.ai.game.feb.service.multiAccount;
 public class Account {
 	private String u;
 	private String p;
+	public Account() {
+		super();
+	}
 	public Account(String u, String p) {
 		super();
 		this.u = u;
@@ -19,5 +22,8 @@ public class Account {
 	}
 	public void setP(String p) {
 		this.p = p;
+	}
+	public String toString() {
+		return String.format("%s:%s", u, p);
 	}
 }

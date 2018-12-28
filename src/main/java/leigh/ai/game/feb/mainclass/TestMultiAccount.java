@@ -12,7 +12,7 @@ public class TestMultiAccount {
 				"Ccwwaf", "7777777", "蛇龙骑士",
 				"Ccwwag", "7777777", "蛇龙骑士",
 		};
-		TeamRaidBiz.helpLaofan(args);
+//		TeamRaidBiz.helpLaofan(args);
 	}
 
 }

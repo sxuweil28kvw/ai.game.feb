@@ -1,14 +1,22 @@
 package leigh.ai.game.feb.business;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import leigh.ai.game.feb.dto.raid.HelpLaofanParam;
 import leigh.ai.game.feb.dto.team.ReceivingTeamInviteException;
 import leigh.ai.game.feb.dto.team.Team;
 import leigh.ai.game.feb.service.BattleService;
+import leigh.ai.game.feb.service.FacilityService;
 import leigh.ai.game.feb.service.ItemService;
 import leigh.ai.game.feb.service.JobService;
 import leigh.ai.game.feb.service.LoginService;
@@ -18,6 +26,7 @@ import leigh.ai.game.feb.service.PersonStatusService;
 import leigh.ai.game.feb.service.RaidService;
 import leigh.ai.game.feb.service.TeamService;
 import leigh.ai.game.feb.service.multiAccount.Account;
+import leigh.ai.game.feb.service.raid.RaidMapType;
 import leigh.ai.game.feb.service.raid.RaidStopReason;
 import leigh.ai.game.feb.service.status.Item;
 import leigh.ai.game.feb.service.status.MyStatus.MyItem;
@@ -27,17 +36,7 @@ import leigh.ai.game.feb.util.HttpUtil;
 public class TeamRaidBiz {
 	private static final Logger logger = LoggerFactory.getLogger(TeamRaidBiz.class);
 	
-	public static void helpLaofan(String[] args) {
-		boolean[] isZhenshi = parseIsZhenshi(args[0]);
-		Account[] accounts = new Account[isZhenshi.length + 1];
-		String[] upperJobs = new String[isZhenshi.length];
-		Account dahao = new Account(args[1], args[2]);
-		accounts[0] = dahao;
-		for(int i = 3; i < args.length; i += 3) {
-			Account xiaohao = new Account(args[i], args[i + 1]);
-			accounts[i / 3] = xiaohao;
-			upperJobs[i / 3 - 1] = args[i + 2];
-		}
+	public static void helpLaofan(Account[] accounts, Boolean[] isZhenshi, String[] upperJobs) {
 		MultiAccountService.login(accounts);
 		team(accounts, 0, false);
 		
@@ -284,13 +283,13 @@ public class TeamRaidBiz {
 		}
 	}
 
-	private static boolean[] parseIsZhenshi(String string) {
-		boolean[] result = new boolean[string.length()];
-		for(int i = 0; i < string.length(); i++) {
-			result[i] = string.charAt(i) == '1';
-		}
-		return result;
-	}
+//	private static boolean[] parseIsZhenshi(String string) {
+//		boolean[] result = new boolean[string.length()];
+//		for(int i = 0; i < string.length(); i++) {
+//			result[i] = string.charAt(i) == '1';
+//		}
+//		return result;
+//	}
 	
 	/***********
 	 * 
@@ -347,6 +346,120 @@ public class TeamRaidBiz {
 		team(accounts, healerIndex, true);
 		int battlePerson = 0;
 		MultiAccountService.activate(0);
-		ItemService.ensureItems(Item.铁丝, Item.天马的羽毛M);
+		ItemService.ensureItems(Item.铁丝, Item.天马的羽毛M, Item.会员圣水);
+		ItemService.equip(Item.天马的羽毛M);
+		MultiAccountService.activate(healerIndex);
+		FacilityService.drawCash(48000);
+		Item[] BStaffs = new Item[5];
+		Arrays.fill(BStaffs, Item.B杖);
+		ItemService.ensureItems(BStaffs);
+		FacilityService.drawCash(36000);
+		for(int i = 0; i < accounts.length; i++) {
+			MultiAccountService.activate(i);
+			MoveService.enterRuin();
+		}
+		
+		List<RaidMapType> ruinMap = RaidService.raidMap.get(-9);
+		
+		int firstEnemyPosition = RaidService.firstEnemyPosition(-9);
+		while(firstEnemyPosition >= 0 && firstEnemyPosition < 12) {
+			int whoEngagedFirstEnemy = -1;
+			for(int i = 0; i < accounts.length; i++) {
+				MultiAccountService.activate(i);
+				RaidService.moveNoBattleUntil(-1, firstEnemyPosition);
+				if(whoEngagedFirstEnemy != battlePerson && RaidService.myPosition == firstEnemyPosition) {
+					whoEngagedFirstEnemy = i;
+				}
+			}
+			switch(ruinMap.get(firstEnemyPosition)) {
+			case door:
+				MultiAccountService.activate(0);
+				ItemService.equip(Item.铁丝);
+				RaidService.openDoor();
+				ItemService.equip(Item.天马的羽毛M);
+				break;
+			case enemy:
+			case stopingEnemy:
+				if(whoEngagedFirstEnemy == -1) {
+					MultiAccountService.activate(battlePerson);
+					do {
+						RaidService.exit();
+						MoveService.enterTower();
+						while(RaidService.myPosition < firstEnemyPosition) {
+							RaidService.move();
+						}
+					} while (RaidService.myPosition > firstEnemyPosition);
+				} else if(whoEngagedFirstEnemy != battlePerson) {
+					MultiAccountService.activate(whoEngagedFirstEnemy);
+					if(PersonStatusService.AP < 50) {
+						RaidService.addAp();
+					}
+					MultiAccountService.askForHelp();
+					PersonStatusService.AP -= 50;
+					MultiAccountService.activate(battlePerson);
+				} else {
+					MultiAccountService.activate(battlePerson);
+					if(PersonStatusService.AP < 50) {
+						RaidService.addAp();
+					}
+					MultiAccountService.askForHelp();
+					PersonStatusService.AP -= 50;
+				}
+				
+				RaidStopReason rsr = RaidService.ruinBattle();
+				while(rsr != null) {
+					switch(rsr) {
+					case noAp:
+					case noHeal:
+						int location = PersonStatusService.currentLocation, position = RaidService.myPosition;
+						RaidService.exit();
+						RaidService.repairAllWeapons();
+						if(!JobService.canUseStaff()) {
+							RaidService.ensureHolywaterOutside();
+						}
+						BattleService.buyMedicine();
+						MoveService.enterTower();
+						RaidService.moveNoBattleUntil(location, position);
+						for(int i = 1; i < accounts.length; i++) {
+							if(MultiAccountService.status.get(i).getRaidMapPosition() == position) {
+								MultiAccountService.activate(i);
+								if(PersonStatusService.AP < 50) {
+									RaidService.addAp();
+								}
+								MultiAccountService.askForHelp();
+								PersonStatusService.AP -= 50;
+								MultiAccountService.activate(battlePerson);
+								break;
+							}
+						}
+						break;
+					default:
+						break;
+					}
+					rsr = RaidService.raidBattle();
+				}
+				RaidService.addDeadPosition();
+				break;
+			default:
+				logger.warn("ERROR! firstEnemyPosition={}, type={}",
+						firstEnemyPosition, ruinMap.get(firstEnemyPosition).name());
+				break;
+			}
+			firstEnemyPosition = RaidService.firstEnemyPosition(-9);
+		}
+	}
+
+	public static void dai1zhuan(String ymlFile) {
+		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+		HelpLaofanParam param = null;
+		try {
+			param = mapper.readValue(new File(ymlFile), HelpLaofanParam.class);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		helpLaofan(param.getAccounts().toArray(new Account[0]),
+				param.getIsZhenshi().toArray(new Boolean[0]),
+				param.getUpperJobs().toArray(new String[0]));
 	}
 }

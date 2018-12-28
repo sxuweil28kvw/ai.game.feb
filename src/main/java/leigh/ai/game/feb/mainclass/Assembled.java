@@ -92,6 +92,9 @@ public class Assembled {
 			case "1zhuan":
 				AccountBiz.yizhuan(args[0], args[1]);
 				break;
+			case "dai1zhuan":
+				TeamRaidBiz.dai1zhuan(args[0]);
+				break;
 			case "zhaobing":
 				MercenaryBiz.pickVeryGood(args[0], args[1], Integer.parseInt(args[2]));
 				break;
@@ -111,9 +114,6 @@ public class Assembled {
 				break;
 			case "tagangshendian":
 				TagangBiz.tagangShrine(args);
-				break;
-			case "helplaofan":
-				TeamRaidBiz.helpLaofan(args);
 				break;
 			default:
 				System.out.println("不认识的参数！");

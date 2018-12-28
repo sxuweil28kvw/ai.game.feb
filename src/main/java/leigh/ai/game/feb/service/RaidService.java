@@ -354,16 +354,21 @@ public class RaidService {
 	public static int firstEnemyPosition(int location) {
 		List<RaidMapType> map = RaidService.raidMap.get(location);
 		for(int i = 0; i < map.size(); i++) {
-			if(!map.get(i).equals(RaidMapType.enemy) && !map.get(i).equals(RaidMapType.stopingEnemy)) {
+			switch(map.get(i)) {
+			case enemy:
+			case stopingEnemy:
+			case door:
+			case chest:
+				if(!RaidService.deadEnemies.containsKey(location)) {
+					return i;
+				}
+				if(RaidService.deadEnemies.get(location).contains(i)) {
+					continue;
+				} else {
+					return i;
+				}
+			default:
 				continue;
-			}
-			if(!RaidService.deadEnemies.containsKey(location)) {
-				return i;
-			}
-			if(RaidService.deadEnemies.get(location).contains(i)) {
-				continue;
-			} else {
-				return i;
 			}
 		}
 		return -1;
@@ -525,6 +530,42 @@ public class RaidService {
 			}
 		}
 		return false;
+	}
+	public static RaidStopReason ruinBattle() {
+		BattleInfo result;
+		do {
+			RaidBattleData data = RaidParser.parseBattleData(HttpUtil.get("pve.php"));
+			
+			int enemyMaxDmg1t = data.getEnemyMaxDmg1t();
+			if(RaidService.myPosition == 2 || RaidService.myPosition == 3
+					|| RaidService.myPosition == 5 || RaidService.myPosition == 6) {
+				enemyMaxDmg1t *= 2;
+			}
+			if(enemyMaxDmg1t >= PersonStatusService.maxHP) {
+				//what to do?
+			} else if(enemyMaxDmg1t >= data.getMyHp()) {
+				if(!RaidService.selfHeal()) {
+					return RaidStopReason.noHeal;
+				}
+				data = RaidParser.parseBattleData(HttpUtil.get("pve.php"));
+			}
+			
+			if(PersonStatusService.AP < 10) {
+				if(!RaidService.addAp()) {
+					return RaidStopReason.noAp;
+				}
+			}
+			
+			int turns = 1;
+			if(RaidService.myPosition == 11) {
+				ItemService.equip(Item.铁丝);
+			}
+			if(!RaidService.ensureWeapon()) {
+				return RaidStopReason.noWeapon;
+			}
+			result = battle(turns);
+		} while(!result.getResult().equals(BattleResult.win));
+		return null;
 	}
 
 }

@@ -14,6 +14,7 @@ public enum Item {
 	D杖("eaab", "治疗之杖", 20, FacilityType.itemshop),
 	C杖("eaac", "痊愈之杖", 15, FacilityType.itemshop),
 	天马的羽毛M("baac", "天马的羽毛M", 5, FacilityType.itemshop),
+	B杖("eaad", "治愈之杖", 15, FacilityType.itemshopMember),
 	;
 	private String code;
 	private String name;

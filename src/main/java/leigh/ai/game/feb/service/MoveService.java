@@ -123,6 +123,22 @@ public class MoveService {
 	public static void moveTo(int target) {
 		movePath(MapService.findPath(PersonStatusService.currentLocation, target));
 	}
+	public static void enterRuin() {
+		MoveService.moveTo(1184);
+		String npcSaid = HttpUtil.get("npc.php?npcid=234");
+		if(!npcSaid.contains("我足够强大")) {
+			throw new IllegalStateException("无法进入遗迹，请检查前提条件！");
+		}
+		npcSaid = HttpUtil.get("npc.php?npcid=234&act=Q0_9999A");
+		if(!npcSaid.contains("原来如此，那么你可以进入格拉多遗迹。")) {
+			throw new IllegalStateException("无法进入遗迹，请检查前提条件！");
+		}
+		HttpUtil.get("move.php?display=1");
+		PersonStatusService.currentLocation = -9;
+		RaidService.myPosition = 0;
+		FakeSleepUtil.sleep(2, 3);
+		logger.debug("应该进入了遗迹");
+	}
 	public static boolean enterTemple() {
 		MoveService.moveTo(1130);
 		String npcSaid = HttpUtil.get("npc.php?npcid=112");
