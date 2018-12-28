@@ -77,21 +77,21 @@ public class ItemService {
 			for(int i = 0; i < tmp1.size(); i++) {
 				MyItem t = tmp1.get(i);
 				if(t.getName().equals(item.getName())) {
+					tmp1.remove(i--);
 					if(t.getAmountLeft() == item.getMaxAmount()) {
-						tmp1.remove(i--);
 						needBuy = false;
+						break;
 					} else {
 						toSell.add(t);
 					}
-					break;
 				}
-				if(needBuy) {
-					toBuy.add(item);
-				}
+			}
+			if(needBuy) {
+				toBuy.add(item);
 			}
 		}
 		toStore.addAll(tmp1);
-		if(toStore.size() > 1) {
+		if(toStore.size() > 0) {
 			MoveService.moveToFacility(FacilityType.bank);
 			for(MyItem t: toStore) {
 				if(!FacilityService.storeItem(t.getPosition())) {
@@ -116,8 +116,35 @@ public class ItemService {
 			}
 		});
 		MoveService.moveToFacility(toBuy.get(0).getBuyFrom());
-		if(toSell.size() > 1) {
-			
+		if(toSell.size() > 0) {
+			for(MyItem t: toSell) {
+				FacilityService.sellItem(t);
+			}
+		}
+		for(int i = 0; i < toBuy.size(); i++) {
+			MoveService.moveToFacility(toBuy.get(i).getBuyFrom());
+			FacilityService.buyItem(toBuy.get(i).getCode());
+		}
+		if(logger.isDebugEnabled()) {
+			StringBuilder logsb = new StringBuilder("ensureWeapon(");
+			for(Item item: items) {
+				logsb.append(item).append(',');
+			}
+			logsb.append(") result=[");
+			for(MyItem t: PersonStatusService.items) {
+				logsb.append(t.getName()).append('*').append(t.getAmountLeft()).append(',');
+			}
+			logsb.append(']');
+			logger.debug(logsb.toString());
+		}
+	}
+
+	public static void equip(Item item) {
+		for(MyItem t: PersonStatusService.items) {
+			if(t.getName().equals(item.getName())) {
+				ItemService.equipItem(t);
+				return;
+			}
 		}
 	}
 }
