@@ -443,7 +443,7 @@ public class TeamRaidBiz {
 					default:
 						break;
 					}
-					rsr = RaidService.raidBattle();
+					rsr = RaidService.ruinBattle();
 				}
 				RaidService.addDeadPosition();
 				break;
