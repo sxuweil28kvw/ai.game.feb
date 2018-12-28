@@ -37,7 +37,16 @@ public class FacilityService {
 		weaponshopB,
 		bank,
 		inn,
-		airport,
+		airport,;
+
+		public static FacilityType[] weaponShops() {
+			return new FacilityType[] {
+					weaponshopE,
+					weaponshopD,
+					weaponshopC,
+					weaponshopB,
+			};
+		}
 	}
 	public static Map<FacilityType, List<Integer>> map;
 	static {
@@ -129,6 +138,9 @@ public class FacilityService {
 		return map.get(type).contains(currentLocation);
 	}
 	public static void drawCash(int targetMoney) {
+		if(targetMoney < PersonStatusService.money) {
+			return;
+		}
 		MapPath path = MapService.findFacilityExceptTraffics(PersonStatusService.currentLocation, new FacilityType[] {FacilityType.bank}, Traffic.ship);
 		MoveService.movePath(path);
 		HttpUtil.get("shopbanka.php");

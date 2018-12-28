@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import leigh.ai.game.feb.parsers.RaidParser;
 import leigh.ai.game.feb.service.multiAccount.Account;
+import leigh.ai.game.feb.service.status.MyStatus.MyItem;
 import leigh.ai.game.feb.service.status.PersonStatus;
 import leigh.ai.game.feb.util.HttpUtil;
 
@@ -140,5 +141,17 @@ public class MultiAccountService {
 			}
 		}
 		MultiAccountService.activate(currentPerson);
+	}
+	public static void healMate(MyItem staff, int battlePerson) {
+		int userId = status.get(battlePerson).getUserId();
+		String username = status.get(battlePerson).getAccount().getU();
+		String tmp1 = HttpUtil.get("useitem_heal.php?goto=useitem&wrap=" + staff.getPosition());
+		if(!tmp1.contains(username)) {
+			logger.error("无法治疗{}！", username);
+			return;
+		}
+		HttpUtil.get("useitem_heal.php?goto=teamuse&wrap=" + staff.getPosition() + "&maintext=" + userId);
+		HttpUtil.get("useitem.php");
+		logger.debug("应该使用{}治疗了{}", staff.getName(), username);
 	}
 }

@@ -17,6 +17,7 @@ import leigh.ai.game.feb.dto.team.ReceivingTeamInviteException;
 import leigh.ai.game.feb.dto.team.Team;
 import leigh.ai.game.feb.service.BattleService;
 import leigh.ai.game.feb.service.FacilityService;
+import leigh.ai.game.feb.service.FacilityService.FacilityType;
 import leigh.ai.game.feb.service.ItemService;
 import leigh.ai.game.feb.service.JobService;
 import leigh.ai.game.feb.service.LoginService;
@@ -347,9 +348,11 @@ public class TeamRaidBiz {
 		int battlePerson = 0;
 		MultiAccountService.activate(0);
 		ItemService.ensureItems(Item.铁丝, Item.天马的羽毛M, Item.会员圣水);
+		MoveService.moveToFacility(FacilityType.weaponShops());
+		RaidService.repairAllWeapons();
 		ItemService.equip(Item.天马的羽毛M);
 		MultiAccountService.activate(healerIndex);
-		FacilityService.drawCash(48000);
+		FacilityService.drawCash(36000);
 		Item[] BStaffs = new Item[5];
 		Arrays.fill(BStaffs, Item.B杖);
 		ItemService.ensureItems(BStaffs);
@@ -366,7 +369,7 @@ public class TeamRaidBiz {
 			int whoEngagedFirstEnemy = -1;
 			for(int i = 0; i < accounts.length; i++) {
 				MultiAccountService.activate(i);
-				RaidService.moveNoBattleUntil(-1, firstEnemyPosition);
+				RaidService.moveNoBattleUntil(-9, firstEnemyPosition);
 				if(whoEngagedFirstEnemy != battlePerson && RaidService.myPosition == firstEnemyPosition) {
 					whoEngagedFirstEnemy = i;
 				}
@@ -411,13 +414,17 @@ public class TeamRaidBiz {
 					switch(rsr) {
 					case noAp:
 					case noHeal:
-						int location = PersonStatusService.currentLocation, position = RaidService.myPosition;
+						MultiAccountService.activate(healerIndex);
+						MultiAccountService.healMate(PersonStatusService.items.get(0), battlePerson);
+						MultiAccountService.activate(battlePerson);
+						PersonStatusService.HP = PersonStatusService.maxHP;
+						PersonStatusService.AP = 100;
+						break;
+					case noWeapon:
+						int location = PersonStatusService.currentLocation;
+						int position = RaidService.myPosition;
 						RaidService.exit();
 						RaidService.repairAllWeapons();
-						if(!JobService.canUseStaff()) {
-							RaidService.ensureHolywaterOutside();
-						}
-						BattleService.buyMedicine();
 						MoveService.enterTower();
 						RaidService.moveNoBattleUntil(location, position);
 						for(int i = 1; i < accounts.length; i++) {
