@@ -278,6 +278,17 @@ public class RaidService {
 		addDeadPosition();
 		FakeSleepUtil.sleep(2, 3);
 	}
+	public static String openChest() {
+		String chestResponse = HttpUtil.get("raid_binn.php");
+		String chestItem = null;
+		try {
+			chestItem = chestResponse.split("发现了", 2)[1].split("<br>", 2)[0];
+			return chestItem;
+		} catch(Exception e) {
+			ParserExceptionHandler.warn(e, chestResponse, "解析开宝箱失败！");
+		}
+		return null;
+	}
 	public static void addDeadPosition() {
 		if(!RaidService.deadEnemies.containsKey(PersonStatusService.currentLocation)) {
 			Set<Integer> value = new HashSet<Integer>();

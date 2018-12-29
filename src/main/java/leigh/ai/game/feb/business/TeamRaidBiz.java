@@ -471,8 +471,12 @@ public class TeamRaidBiz {
 				break;
 			}
 			firstEnemyPosition = RaidService.firstEnemyChestDoorPosition(-9);
-			
 		}
+		
+		MultiAccountService.activate(0);
+		RaidService.move();
+		
+		logger.info("遗迹打通！");
 	}
 
 	private static void teamHeal(int healerIndex, int battlePerson) {
