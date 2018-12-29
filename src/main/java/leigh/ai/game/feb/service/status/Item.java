@@ -15,6 +15,7 @@ public enum Item {
 	C杖("eaac", "痊愈之杖", 15, FacilityType.itemshop),
 	天马的羽毛M("baac", "天马的羽毛M", 5, FacilityType.itemshop),
 	B杖("eaad", "治愈之杖", 15, FacilityType.itemshopMember),
+	A杖("eaae", "生命之杖", 15, FacilityType.itemshopMember),
 	;
 	private String code;
 	private String name;
@@ -49,5 +50,12 @@ public enum Item {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public static boolean isHealingStaff(String name) {
+		return name.equals(B杖.getName())
+				|| name.equals(C杖.getName())
+				|| name.equals(D杖.getName())
+				|| name.equals(E杖.getName())
+				|| name.equals(A杖.getName());
 	}
 }

@@ -552,7 +552,7 @@ public class RaidService {
 		return false;
 	}
 	public static RaidStopReason ruinBattle() {
-		BattleInfo result;
+		BattleInfo result = null;
 		do {
 			RaidBattleData data = RaidParser.parseBattleData(HttpUtil.get("pve.php"));
 			
@@ -561,13 +561,13 @@ public class RaidService {
 					|| RaidService.myPosition == 5 || RaidService.myPosition == 6) {
 				enemyMaxDmg1t *= 2;
 			}
-			if(enemyMaxDmg1t >= PersonStatusService.maxHP) {
-				//what to do?
-			} else if(enemyMaxDmg1t >= data.getMyHp()) {
-				if(!RaidService.selfHeal()) {
+			
+			if(RaidService.myPosition >= 8) {
+				if(data.getMyHp() < PersonStatusService.maxHP) {
 					return RaidStopReason.noHeal;
 				}
-				data = RaidParser.parseBattleData(HttpUtil.get("pve.php"));
+			} else if(enemyMaxDmg1t >= data.getMyHp()) {
+				return RaidStopReason.noHeal;
 			}
 			
 			if(PersonStatusService.AP < 10) {

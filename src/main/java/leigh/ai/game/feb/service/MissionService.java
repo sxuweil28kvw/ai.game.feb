@@ -214,9 +214,10 @@ public class MissionService {
 			logger.error("塞思没有提到援军！");
 			return;
 		}
-		HttpUtil.get("npc.php?npcid=102&act=Q1_1");
+		saisiSaid = HttpUtil.get("npc.php?npcid=102&act=Q1_1");
 		//在魔殿杀死至少10只魔物，当然，如果你愿意，你可以杀死更多，应该可以获得更好的奖励<br>已杀死：0/10或50
 		
+		BattleService.killSomeEnemies(50, 1188);
 		
 	}
 	

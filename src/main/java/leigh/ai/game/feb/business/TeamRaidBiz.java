@@ -31,6 +31,7 @@ import leigh.ai.game.feb.service.raid.RaidMapType;
 import leigh.ai.game.feb.service.raid.RaidStopReason;
 import leigh.ai.game.feb.service.status.Item;
 import leigh.ai.game.feb.service.status.MyStatus.MyItem;
+import leigh.ai.game.feb.service.status.MyStatus.MyWeapon;
 import leigh.ai.game.feb.service.status.PersonStatus;
 import leigh.ai.game.feb.util.HttpUtil;
 
@@ -100,6 +101,7 @@ public class TeamRaidBiz {
 				case noHeal:
 					int location = PersonStatusService.currentLocation, position = RaidService.myPosition;
 					RaidService.exit();
+					MoveService.moveTo(1113);
 					RaidService.repairAllWeapons();
 					if(!JobService.canUseStaff()) {
 						RaidService.ensureHolywaterOutside();
@@ -348,9 +350,11 @@ public class TeamRaidBiz {
 		int battlePerson = 0;
 		MultiAccountService.activate(0);
 		ItemService.ensureItems(Item.铁丝, Item.天马的羽毛M, Item.会员圣水);
+		FacilityService.drawCash(30000);
 		MoveService.moveToFacility(FacilityType.weaponShops());
 		RaidService.repairAllWeapons();
 		ItemService.equip(Item.天马的羽毛M);
+		FacilityService.drawCash(48000);
 		MultiAccountService.activate(healerIndex);
 		FacilityService.drawCash(36000);
 		Item[] BStaffs = new Item[5];
@@ -366,6 +370,23 @@ public class TeamRaidBiz {
 		
 		int firstEnemyPosition = RaidService.firstEnemyChestDoorPosition(-9);
 		while(firstEnemyPosition >= 0 && firstEnemyPosition < 12) {
+			MultiAccountService.activate(battlePerson);
+			if(PersonStatusService.HP < PersonStatusService.maxHP) {
+				teamHeal(healerIndex, battlePerson);
+				RaidService.forceMove();
+			}
+			
+			int totalWeaponAmount = 0;
+			for(MyWeapon w: PersonStatusService.weapons) {
+				totalWeaponAmount += w.getAmountLeft();
+			}
+			if(totalWeaponAmount < 90) {
+				RaidService.exit();
+				MoveService.moveToFacility(FacilityType.weaponShops());
+				RaidService.repairAllWeapons();
+				MoveService.enterRuin();
+			}
+			
 			int whoEngagedFirstEnemy = -1;
 			for(int i = 0; i < accounts.length; i++) {
 				MultiAccountService.activate(i);
@@ -387,7 +408,7 @@ public class TeamRaidBiz {
 					MultiAccountService.activate(battlePerson);
 					do {
 						RaidService.exit();
-						MoveService.enterTower();
+						MoveService.enterRuin();
 						while(RaidService.myPosition < firstEnemyPosition) {
 							RaidService.move();
 						}
@@ -410,22 +431,19 @@ public class TeamRaidBiz {
 				}
 				
 				RaidStopReason rsr = RaidService.ruinBattle();
-				while(rsr != null) {
+     				while(rsr != null) {
 					switch(rsr) {
 					case noAp:
 					case noHeal:
-						MultiAccountService.activate(healerIndex);
-						MultiAccountService.healMate(PersonStatusService.items.get(0), battlePerson);
-						MultiAccountService.activate(battlePerson);
-						PersonStatusService.HP = PersonStatusService.maxHP;
-						PersonStatusService.AP = 100;
+						teamHeal(healerIndex, battlePerson);
 						break;
 					case noWeapon:
 						int location = PersonStatusService.currentLocation;
 						int position = RaidService.myPosition;
 						RaidService.exit();
+						MoveService.moveToFacility(FacilityType.weaponShops());
 						RaidService.repairAllWeapons();
-						MoveService.enterTower();
+						MoveService.enterRuin();
 						RaidService.moveNoBattleUntil(location, position);
 						for(int i = 1; i < accounts.length; i++) {
 							if(MultiAccountService.status.get(i).getRaidMapPosition() == position) {
@@ -453,7 +471,23 @@ public class TeamRaidBiz {
 				break;
 			}
 			firstEnemyPosition = RaidService.firstEnemyChestDoorPosition(-9);
+			
 		}
+	}
+
+	private static void teamHeal(int healerIndex, int battlePerson) {
+		MultiAccountService.activate(healerIndex);
+		MyItem staff = null;
+		for(MyItem t: PersonStatusService.items) {
+			if(Item.isHealingStaff(t.getName())) {
+				staff = t;
+				break;
+			}
+		}
+		MultiAccountService.healMate(staff, battlePerson);
+		MultiAccountService.activate(battlePerson);
+		PersonStatusService.HP = PersonStatusService.maxHP;
+		PersonStatusService.AP = 50;
 	}
 
 	public static void dai1zhuan(String ymlFile) {

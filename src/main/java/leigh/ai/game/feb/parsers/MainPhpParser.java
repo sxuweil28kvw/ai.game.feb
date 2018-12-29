@@ -37,7 +37,8 @@ public class MainPhpParser {
 			if(logger.isDebugEnabled()) {
 				logger.debug("HP={},maxHp={},AP={},currentLocation={},myjob={}",
 						PersonStatusService.HP, PersonStatusService.maxHP, PersonStatusService.AP,
-						PersonStatusService.currentLocation, PersonStatusService.myjob);
+						MapService.map.get(PersonStatusService.currentLocation).getName(),
+						PersonStatusService.myjob);
 			}
 			
 			return currentLocation;
