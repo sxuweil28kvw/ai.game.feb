@@ -373,7 +373,7 @@ public class TeamRaidBiz {
 			MultiAccountService.activate(battlePerson);
 			if(PersonStatusService.HP < PersonStatusService.maxHP) {
 				teamHeal(healerIndex, battlePerson);
-				RaidService.forceMove();
+				RaidService.move();
 			}
 			
 			int totalWeaponAmount = 0;
