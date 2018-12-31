@@ -12,9 +12,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import leigh.ai.game.feb.dto.bag.GivenItem;
 import leigh.ai.game.feb.dto.raid.HelpLaofanParam;
 import leigh.ai.game.feb.dto.team.ReceivingTeamInviteException;
 import leigh.ai.game.feb.dto.team.Team;
+import leigh.ai.game.feb.service.BagService;
 import leigh.ai.game.feb.service.BattleService;
 import leigh.ai.game.feb.service.FacilityService;
 import leigh.ai.game.feb.service.FacilityService.FacilityType;
@@ -25,6 +27,7 @@ import leigh.ai.game.feb.service.MoveService;
 import leigh.ai.game.feb.service.MultiAccountService;
 import leigh.ai.game.feb.service.PersonStatusService;
 import leigh.ai.game.feb.service.RaidService;
+import leigh.ai.game.feb.service.TagangMissionService;
 import leigh.ai.game.feb.service.TeamService;
 import leigh.ai.game.feb.service.multiAccount.Account;
 import leigh.ai.game.feb.service.raid.RaidMapType;
@@ -345,7 +348,13 @@ public class TeamRaidBiz {
 		return team;
 	}
 	
-	public static void ruin(Account[] accounts, int healerIndex) {
+	/*****************
+	 * 
+	 * @param accounts
+	 * @param healerIndex
+	 * @param target 0=星之光；1=对话UN(停在UN，然后手动)；2=打死UN，不交星之光
+	 */
+	public static void ruin(Account[] accounts, int healerIndex, int target) {
 		team(accounts, healerIndex, true);
 		int battlePerson = 0;
 		MultiAccountService.activate(0);
@@ -370,6 +379,10 @@ public class TeamRaidBiz {
 		
 		int firstEnemyPosition = RaidService.firstEnemyChestDoorPosition(-9);
 		while(firstEnemyPosition >= 0 && firstEnemyPosition < 12) {
+			if(target == 1 && firstEnemyPosition == 11) {
+				logger.info("到达尤恩面前！");
+				return;
+			}
 			MultiAccountService.activate(battlePerson);
 			if(PersonStatusService.HP < PersonStatusService.maxHP) {
 				teamHeal(healerIndex, battlePerson);
@@ -477,6 +490,39 @@ public class TeamRaidBiz {
 		RaidService.move();
 		
 		logger.info("遗迹打通！");
+		if(target > 0) {
+			return;
+		}
+		
+		for(int i = 0; i < accounts.length; i++) {
+			MultiAccountService.activate(i);
+			TagangMissionService.checkMission();
+			if(!TagangMissionService.bananaMissionStatus.contains("星之光")) {
+				continue;
+			}
+			if(TagangMissionService.bananaMissionStatus.contains("已超时")) {
+				continue;
+			}
+			BagService.update();
+			boolean hasXingzhiguang = false;
+			for(GivenItem e: BagService.givenItems) {
+				if(e.getName().contains("星之光")) {
+					hasXingzhiguang = true;
+					break;
+				}
+			}
+			if(!hasXingzhiguang) {
+				continue;
+			}
+			MoveService.moveTo(1161);
+			if(PersonStatusService.items.size() >= 5) {
+				
+			}
+		}
+	}
+	
+	public static void ruin(Account[] accounts, int healerIndex) {
+		ruin(accounts, healerIndex, 2);
 	}
 
 	private static void teamHeal(int healerIndex, int battlePerson) {

@@ -31,7 +31,6 @@ public class TagangMissionService {
 		if(!mowuMissionStatus.equals(TagangMissionStatus.untake) && !mojiangMissionStatus.equals(TagangMissionStatus.untake)) {
 			return;
 		}
-		String tagangHtml = null;
 		if(PersonStatusService.currentLocation != 1161) {
 			//去塔港
 			MapPath path1 = MapService.findPath(PersonStatusService.currentLocation, 1161);
