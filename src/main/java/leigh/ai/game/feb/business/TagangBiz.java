@@ -77,6 +77,48 @@ public class TagangBiz {
 		}
 		System.out.println("程序执行完毕。");
 	}
+	
+	public static void takeTagang(String[] args) {
+		if(args == null || args.length == 0) {
+			System.out.println("请指定账号文件路径。");
+			System.exit(1);
+		}
+		List<String[]> accounts = new LinkedList<String[]>();
+		List<String> banana = new LinkedList<String>();
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new UnicodeReader(new FileInputStream(args[0]), "utf8"));
+			String line = br.readLine();
+			while(line != null) {
+				if(line.trim().equals("")) {
+					continue;
+				}
+				String[] spl = line.split("=", 2);
+				if(spl.length < 2) {
+					continue;
+				}
+				accounts.add(spl);
+				System.out.println(spl[0] + " 领取塔港任务。");
+				LoginService.login(spl[0], spl[1]);
+				TagangMissionService.takeMission();
+				LoginService.logout();
+				line = br.readLine();
+			}
+		} catch(FileNotFoundException e) {
+			System.out.println("指定的账号文件不存在！可能路径写法错误？");
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("账号文件读取出错！");
+		} finally {
+			if(br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+		System.out.println("接塔港任务完毕。");
+	}
 
 	public static void onlyMowu(String[] args) {
 		if(args == null || args.length == 0) {
@@ -106,10 +148,11 @@ public class TagangBiz {
 				line = br.readLine();
 			}
 		} catch(FileNotFoundException e) {
-			System.out.println("指定的账号文件不存在！可能路径写法错误？");
-			System.exit(1);
+			logger.error("指定的账号文件不存在！可能路径写法错误？");
+			return;
 		} catch (IOException e) {
-			System.out.println("账号文件读取出错！");
+			logger.error("账号文件读取出错！");
+			return;
 		} finally {
 			if(br != null) {
 				try {
