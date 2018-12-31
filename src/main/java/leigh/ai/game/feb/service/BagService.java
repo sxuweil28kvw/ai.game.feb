@@ -1,22 +1,27 @@
 package leigh.ai.game.feb.service;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-
-import leigh.ai.game.feb.parsers.NumberParser;
-import leigh.ai.game.feb.parsers.ParserExceptionHandler;
-import leigh.ai.game.feb.util.HttpUtil;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import leigh.ai.game.feb.dto.bag.GivenItem;
+import leigh.ai.game.feb.parsers.NumberParser;
+import leigh.ai.game.feb.parsers.ParserExceptionHandler;
+import leigh.ai.game.feb.util.HttpUtil;
 
 public class BagService {
 	private static Logger logger = LoggerFactory.getLogger(BagService.class);
 	public static String[] resourceNameList = {"木材","金属","蘑菇","骷髅","腐牙","魔眼","马蹄","毒液","利爪","魔翼","咒血","蛇头","龙皮","魔晶","奥沙"};
 	public static Map<Integer, Integer> resourceAmount = new HashMap<Integer, Integer>(resourceNameList.length);
+	public static List<GivenItem> givenItems = new LinkedList<GivenItem>();
 	public static void update() {
 		String stuff = HttpUtil.get("stuff.php");
 		resourceAmount.clear();
@@ -50,8 +55,25 @@ public class BagService {
 				log.append("]");
 				logger.debug(log.toString());
 			}
+			
+			Element givenTbody = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(0);
+			Elements trs = givenTbody.children();
+			if(trs.size() > 2) {
+				for(int i = 2; i < trs.size(); i++) {
+					GivenItem gi = new GivenItem();
+					Element tr = trs.get(i);
+					gi.setType(tr.child(0).text());
+					gi.setName(tr.child(1).text());
+					gi.setGivenBy(tr.child(2).text());
+					gi.setAmount(Integer.parseInt(tr.child(3).text()));
+					gi.setTime(tr.child(4).text());
+					gi.setAcceptUri(tr.child(5).child(0).attr("onclick").split("hatturn\\('", 2)[1].split("','", 2)[0]);
+					givenItems.add(gi);
+				}
+			}
+			
 		} catch(Exception e) {
-			ParserExceptionHandler.handle(e, stuff, "解析资源界面失败！");
+			ParserExceptionHandler.warn(e, stuff, "解析资源界面失败！");
 		}
 	}
 }
