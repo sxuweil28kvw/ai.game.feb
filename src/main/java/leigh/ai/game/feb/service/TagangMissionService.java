@@ -1,5 +1,6 @@
 package leigh.ai.game.feb.service;
 
+import leigh.ai.game.feb.dto.tagang.TagangMissionStatus;
 import leigh.ai.game.feb.parsers.TagangMissionParser;
 import leigh.ai.game.feb.service.MoveService.BattleConfig;
 import leigh.ai.game.feb.service.battle.BattleInfo;
@@ -18,16 +19,16 @@ public class TagangMissionService {
 	private static final Logger logger = LoggerFactory.getLogger(TagangMissionService.class);
 	public static int mowuLocation;
 	public static int mojiangLocation;
-	public static MissionStatus mowuMissionStatus;
-	public static MissionStatus mojiangMissionStatus;
+	public static TagangMissionStatus mowuMissionStatus;
+	public static TagangMissionStatus mojiangMissionStatus;
 	public static String bananaMissionStatus = "";
 	public static void takeMission() {
 		checkMission();
-		if(mowuMissionStatus.equals(MissionStatus.cooldown) && mojiangMissionStatus.equals(MissionStatus.cooldown)) {
+		if(mowuMissionStatus.equals(TagangMissionStatus.cooldown) && mojiangMissionStatus.equals(TagangMissionStatus.cooldown)) {
 			logger.info("塔港任务冷却中！");
 			return;
 		}
-		if(!mowuMissionStatus.equals(MissionStatus.untake) && !mojiangMissionStatus.equals(MissionStatus.untake)) {
+		if(!mowuMissionStatus.equals(TagangMissionStatus.untake) && !mojiangMissionStatus.equals(TagangMissionStatus.untake)) {
 			return;
 		}
 		String tagangHtml = null;
@@ -100,24 +101,24 @@ public class TagangMissionService {
 			logger.debug("Mojiang mission content=" + mojiangContent);
 		}
 		if(mowuContent.contains("已经可以再") || mowuContent.contains("已超时")) {
-			mowuMissionStatus = MissionStatus.untake;
+			mowuMissionStatus = TagangMissionStatus.untake;
 		} else if(mowuContent.contains("执行中，剩余时间")) {
-			mowuMissionStatus = MissionStatus.taken;
+			mowuMissionStatus = TagangMissionStatus.taken;
 			mowuLocation = MapService.nameLookup.get(mowuContent.split(" 的委托", 2)[0].split("来自 ", 2)[1].trim());
 		} else if(mowuContent.contains("已完成，剩余时间")) {
-			mowuMissionStatus = MissionStatus.killed;
+			mowuMissionStatus = TagangMissionStatus.killed;
 		} else {// *分钟后可以再接到任务
-			mowuMissionStatus = MissionStatus.cooldown;
+			mowuMissionStatus = TagangMissionStatus.cooldown;
 		}
 		if(mojiangContent.contains("已经可以再") || mojiangContent.contains("已超时")) {
-			mojiangMissionStatus = MissionStatus.untake;
+			mojiangMissionStatus = TagangMissionStatus.untake;
 		} else if(mojiangContent.contains("执行中，剩余时间")) {
-			mojiangMissionStatus = MissionStatus.taken;
+			mojiangMissionStatus = TagangMissionStatus.taken;
 			mojiangLocation = MapService.nameLookup.get(mojiangContent.split(" 的委托", 2)[0].split("来自 ", 2)[1].trim());
 		} else if(mojiangContent.contains("已完成，剩余时间")) {
-			mojiangMissionStatus = MissionStatus.killed;
+			mojiangMissionStatus = TagangMissionStatus.killed;
 		} else {
-			mojiangMissionStatus = MissionStatus.cooldown;
+			mojiangMissionStatus = TagangMissionStatus.cooldown;
 		}
 		try {
 			Element bananaTd = table.child(0).child(4).child(0);
@@ -140,7 +141,7 @@ public class TagangMissionService {
 	}
 	public static void doOnlyMowu() {
 		takeMission();
-		if(!mowuMissionStatus.equals(MissionStatus.taken)) {
+		if(!mowuMissionStatus.equals(TagangMissionStatus.taken)) {
 			MoveService.movePath(MapService.findPath(PersonStatusService.currentLocation, 1161), BattleConfig.never);
 			handInMission();
 			return;
@@ -154,20 +155,20 @@ public class TagangMissionService {
 	
 	public static void doMissions() {
 		takeMission();
-		if(!mowuMissionStatus.equals(MissionStatus.taken) && !mojiangMissionStatus.equals(MissionStatus.taken)) {
+		if(!mowuMissionStatus.equals(TagangMissionStatus.taken) && !mojiangMissionStatus.equals(TagangMissionStatus.taken)) {
 			MoveService.movePath(MapService.findPath(PersonStatusService.currentLocation, 1161), BattleConfig.never);
 			handInMission();
 			return;
 		}
 		BattleService.readyForBattle();
-		if(!mowuMissionStatus.equals(MissionStatus.taken)) {
+		if(!mowuMissionStatus.equals(TagangMissionStatus.taken)) {
 			MoveService.movePath(MapService.findPath(PersonStatusService.currentLocation, mojiangLocation), BattleConfig.never);
 			fightMowuOrMojiang(mojiangLocation);
 			MoveService.movePath(MapService.findPath(mojiangLocation, 1161), BattleConfig.never);
 			handInMission();
 			return;
 		}
-		if(!mojiangMissionStatus.equals(MissionStatus.taken)) {
+		if(!mojiangMissionStatus.equals(TagangMissionStatus.taken)) {
 			MoveService.movePath(MapService.findPath(PersonStatusService.currentLocation, mowuLocation), BattleConfig.never);
 			fightMowuOrMojiang(mowuLocation);
 			MoveService.movePath(MapService.findPath(mowuLocation, 1161), BattleConfig.never);
