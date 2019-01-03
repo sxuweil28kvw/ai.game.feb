@@ -59,6 +59,7 @@ public class BagService {
 			Element givenTbody = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(0);
 			Elements trs = givenTbody.children();
 			if(trs.size() > 2) {
+				List<GivenItem> tmp = new LinkedList<GivenItem>();
 				for(int i = 2; i < trs.size(); i++) {
 					GivenItem gi = new GivenItem();
 					Element tr = trs.get(i);
@@ -68,8 +69,9 @@ public class BagService {
 					gi.setAmount(Integer.parseInt(tr.child(3).text()));
 					gi.setTime(tr.child(4).text());
 					gi.setAcceptUri(tr.child(5).child(0).attr("onclick").split("hatturn\\('", 2)[1].split("','", 2)[0]);
-					givenItems.add(gi);
+					tmp.add(gi);
 				}
+				givenItems = tmp;
 			}
 			
 		} catch(Exception e) {

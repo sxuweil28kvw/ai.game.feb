@@ -29,4 +29,22 @@ public class NpcParser {
 		}
 		return summoners;
 	}
+	
+	/***************
+	 * 解析公主对佣兵的评级
+	 * @param src
+	 * @return 一个String[2]。return[0]为进攻评价，return[1]为防守评价。
+	 */
+	public static String[] parsePrincessReview(String src) {
+		Pattern pAttack = Pattern.compile("进攻能力，我觉得可以评级为([A-S]+)：");
+		Matcher m = pAttack.matcher(src);
+		m.find();
+		String attackClass = m.group(1);
+		
+		Pattern pDef = Pattern.compile("防守能力，我想可以称得上([A-S]+[+-]?)：");
+		m = pDef.matcher(src);
+		m.find();
+		String defClass = m.group(1);
+		return new String[] {attackClass, defClass};
+	}
 }

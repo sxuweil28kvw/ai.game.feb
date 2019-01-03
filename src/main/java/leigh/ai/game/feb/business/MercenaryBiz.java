@@ -1,18 +1,33 @@
 package leigh.ai.game.feb.business;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import leigh.ai.game.feb.dto.mercenary.BatchEndTrainingParam;
+import leigh.ai.game.feb.service.FacilityService;
+import leigh.ai.game.feb.service.JobService;
 import leigh.ai.game.feb.service.LoginService;
 import leigh.ai.game.feb.service.MercenaryService;
+import leigh.ai.game.feb.service.MultiAccountService;
 import leigh.ai.game.feb.service.PersonStatusService;
+import leigh.ai.game.feb.service.mercenary.Mercenary;
+import leigh.ai.game.feb.service.mercenary.MercenaryDetail;
+import leigh.ai.game.feb.service.mercenary.MercenaryStatus;
+import leigh.ai.game.feb.service.multiAccount.Account;
 import leigh.ai.game.feb.util.UnicodeReader;
 
 public class MercenaryBiz {
@@ -56,5 +71,176 @@ public class MercenaryBiz {
 			logger.error("{}\t花费{}麻花\t剩余{}麻花", u,
 					mahuaFormer.get(u) - mahuaLeft.get(u), mahuaLeft.get(u));
 		}
+	}
+	
+	public static void batchEndTraining(String yml) {
+		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+		BatchEndTrainingParam param = null;
+		try {
+			param = mapper.readValue(new File(yml), BatchEndTrainingParam.class);
+		} catch (IOException e) {
+			logger.error("解析yml文件失败！", e);
+			return;
+		}
+		if(param == null) {
+			logger.error("解析yml文件失败！");
+			return;
+		}
+		
+		boolean logM = true;
+		File mLogFile = new File(param.getSoldierReviewDataLog());
+		if(!mLogFile.exists()) {
+			try {
+				mLogFile.createNewFile();
+			} catch (IOException e) {
+				logger.error("创建佣兵日志文件{}失败", param.getSoldierReviewDataLog(), e);
+				logM = false;
+			}
+		}
+		PrintWriter pw = null;
+		try {
+			pw = new PrintWriter(new FileWriter(mLogFile, true));
+		} catch (IOException e) {
+			logger.error("", e);
+			logM = false;
+		}
+		
+		int currentGiveto = 0;
+		
+		Account[] accounts = new Account[param.getUsernames().size()];
+		int reviewer = -1;
+		// 见公主者是否在练兵名单中。
+		boolean reviewerTraining = true;
+		for(int i = 0; i < param.getUsernames().size(); i++) {
+			String username = param.getUsernames().get(i);
+			accounts[i] = new Account(username, param.getPassword());
+			if(reviewer == -1 && username.equals(param.getReviewUser())) {
+				reviewer = i;
+			}
+		}
+		if(reviewer == -1) {
+			Account[] tmp = Arrays.copyOf(accounts, accounts.length + 1);
+			tmp[tmp.length - 1] = new Account(param.getReviewUser(), param.getPassword());
+			reviewer = tmp.length - 1;
+			reviewerTraining = false;
+		}
+		MultiAccountService.login(accounts);
+		for(int i = 0; i < accounts.length; i++) {
+			if(i == reviewer && !reviewerTraining) {
+				continue;
+			}
+			MultiAccountService.activate(i);
+			//获取佣兵列表状态
+			MercenaryService.update();
+			for(Mercenary m: MercenaryService.myMercenaries) {
+				if(!m.getStatus().equals(MercenaryStatus.train)) {
+					continue;
+				}
+				//停止训练
+				MercenaryService.endTraining(m);
+				//查询佣兵详细信息
+				MercenaryDetail detail = MercenaryService.queryDetail(m.getId());
+				//不到20级的继续训练
+				if(detail.getLevel() < 20) {
+					MercenaryService.startTraining(m.getId());
+					continue;
+				}
+				if(i != reviewer) {
+					MercenaryService.giveTo(m.getId(), accounts[reviewer].getU());
+				}
+				MultiAccountService.activate(reviewer);
+				String[] review = MercenaryService.review(m.getId());
+				if(logM) {
+					logMercenary(pw, detail, review);
+				}
+				boolean atkOk = false, defOk = false;
+				for(String r: MercenaryService.mercenaryReviewClass) {
+					if(r.equals(param.getMinAtkReview())) {
+						atkOk = true;
+						break;
+					}
+					if(r.equals(review[0])) {
+						break;
+					}
+				}
+				for(String r: MercenaryService.mercenaryReviewClass) {
+					if(r.equals(param.getMinDefReview())) {
+						defOk = true;
+						break;
+					}
+					if(r.equals(review[1])) {
+						break;
+					}
+				}
+				
+				if(atkOk && defOk) {
+					logger.info("练出合格佣兵：{}, {}/{}", detail.toString(), review[0], review[1]);
+					while(!MercenaryService.giveTo(m.getId(), param.getPassTo().get(currentGiveto))) {
+						currentGiveto++;
+						if(currentGiveto >= param.getPassTo().size()) {
+							logger.error("所有合格兵收纳者均已满员！程序退出");
+							if(pw != null) {
+								pw.close();
+							}
+							return;
+						}
+					}
+					logger.debug("已转移给{}", param.getPassTo().get(currentGiveto));
+				} else {
+					MercenaryService.fireMercenary(m.getId());
+				}
+				
+				MultiAccountService.activate(i);
+			}
+			
+			MercenaryService.update();
+			
+			if(PersonStatusService.mahua > 45 &&
+					MercenaryService.limit - MercenaryService.myMercenaries.size() > 10) {
+				FacilityService.mercenaryTen();
+				MercenaryService.update();
+			}
+			int training = 0;
+			int trainingLimit = 5;
+			if(!JobService.isBefore1zhuan(PersonStatusService.myjob)) {
+				trainingLimit = 10;
+			}
+			for(Mercenary m: MercenaryService.myMercenaries) {
+				if(m.getStatus().equals(MercenaryStatus.train)) {
+					training++;
+					continue;
+				}
+				if(!m.getStatus().equals(MercenaryStatus.rest)) {
+					continue;
+				}
+				if(MercenaryService.queryDetail(m.getId()).getLevel() < 20) {
+					if(!MercenaryService.startTraining(m.getId())) {
+						break;
+					}
+					training++;
+					if(training >= trainingLimit) {
+						break;
+					}
+				}
+			}
+		}
+		
+		if(pw != null) {
+			pw.close();
+		}
+	}
+	private static void logMercenary(PrintWriter pw, MercenaryDetail md, String[] review) {
+		StringBuilder sb = new StringBuilder()
+				.append(md.getJob().name()).append(',')
+				.append(md.getMaxHp()).append(',')
+				.append(md.getPwr()).append(',')
+				.append(md.getAgi()).append(',')
+				.append(md.getSpd()).append(',')
+				.append(md.getLck()).append(',')
+				.append(md.getDef()).append(',')
+				.append(md.getPrt()).append(',')
+				.append(review[0]).append(',')
+				.append(review[1]);
+		pw.println(sb.toString());
 	}
 }

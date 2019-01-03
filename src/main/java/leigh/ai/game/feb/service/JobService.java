@@ -19,6 +19,27 @@ public class JobService {
 		}
 		return false;
 	}
+	public static boolean isBefore1zhuan(String job) {
+		if(job.equals("神官骑士")
+				|| job.equals("魔法师")
+				|| job.equals("黑暗法师")
+				|| job.equals("轻骑士")
+				|| job.equals("佣兵")
+				|| job.equals("剑士")
+				|| job.equals("战士")
+				|| job.equals("重骑士")
+				|| job.equals("弓箭手")
+				|| job.equals("修道士")
+				|| job.equals("龙骑士")
+				|| job.equals("盗贼")
+				|| job.equals("斧骑士")
+				|| job.equals("海盗")
+				|| job.equals("天马骑士")
+				) {
+			return true;
+		}
+		return false;
+	}
 	public static boolean canFly() {
 		return canFly(PersonStatusService.myjob);
 	}

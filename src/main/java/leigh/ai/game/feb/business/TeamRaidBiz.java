@@ -16,6 +16,7 @@ import leigh.ai.game.feb.dto.bag.GivenItem;
 import leigh.ai.game.feb.dto.raid.HelpLaofanParam;
 import leigh.ai.game.feb.dto.team.ReceivingTeamInviteException;
 import leigh.ai.game.feb.dto.team.Team;
+import leigh.ai.game.feb.parsers.ItemParser;
 import leigh.ai.game.feb.service.BagService;
 import leigh.ai.game.feb.service.BattleService;
 import leigh.ai.game.feb.service.FacilityService;
@@ -489,6 +490,19 @@ public class TeamRaidBiz {
 		MultiAccountService.activate(0);
 		RaidService.move();
 		
+		//TODO: 配置传送杖图纸和混乱杖
+		String chestItem = RaidService.openChest();
+		if(chestItem.contains("杖")) {
+			for(int i = 0; i < MultiAccountService.status.size(); i++) {
+				PersonStatus ps = MultiAccountService.status.get(i);
+				if(JobService.canUseStaff(ps.getMyjob())) {
+					RaidService.openChest(ps.getUserId(), ps.getAccount().getU());
+				}
+			}
+		} else {
+			RaidService.openChest(PersonStatusService.userId, LoginService.username);
+		}
+		
 		logger.info("遗迹打通！");
 		if(target > 0) {
 			return;
@@ -516,13 +530,29 @@ public class TeamRaidBiz {
 			}
 			MoveService.moveTo(1161);
 			if(PersonStatusService.items.size() >= 5) {
-				
+				logger.warn("{}道具栏已满！无法自动交星之光。");
 			}
+			for(GivenItem e: BagService.givenItems) {
+				if(e.getName().contains("星之光")) {
+					HttpUtil.get(e.getAcceptUri());
+					ItemParser.itemsAfterUse(HttpUtil.get("useitem.php"));
+					break;
+				}
+			}
+			for(MyItem t: PersonStatusService.items) {
+				if(t.getName().equals("星之光") && !t.getPosition().equals("E")) {
+					ItemService.equipItem(t);
+					break;
+				}
+			}
+			HttpUtil.get("npc.php?npcid=303B");
+			HttpUtil.get("npc.php?npcid=303B&act=mist");
+			LoginService.logout();
 		}
 	}
 	
 	public static void ruin(Account[] accounts, int healerIndex) {
-		ruin(accounts, healerIndex, 2);
+		ruin(accounts, healerIndex, 0);
 	}
 
 	private static void teamHeal(int healerIndex, int battlePerson) {

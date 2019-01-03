@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import leigh.ai.game.feb.parsers.MercenaryParser;
+import leigh.ai.game.feb.parsers.NpcParser;
 import leigh.ai.game.feb.service.mercenary.Mercenary;
 import leigh.ai.game.feb.service.mercenary.MercenaryDetail;
 import leigh.ai.game.feb.service.mercenary.MercenaryJob;
@@ -33,6 +35,21 @@ public class MercenaryService {
 	 */
 	public static int limit = 0;
 	public static List<Mercenary> myMercenaries = new ArrayList<Mercenary>();
+	public static LinkedList<String> mercenaryReviewClass = new LinkedList<String>();
+	static {
+		mercenaryReviewClass.add("F");
+		mercenaryReviewClass.add("E");
+		mercenaryReviewClass.add("D");
+		mercenaryReviewClass.add("C");
+		mercenaryReviewClass.add("B");
+		mercenaryReviewClass.add("B+");
+		mercenaryReviewClass.add("A");
+		mercenaryReviewClass.add("AA");
+		mercenaryReviewClass.add("AAA");
+		mercenaryReviewClass.add("S");
+		mercenaryReviewClass.add("SS");
+		mercenaryReviewClass.add("SSS");
+	}
 	public static void update() {
 		MercenaryParser.parseOuterFrame(HttpUtil.get("soldier.php"));
 		MercenaryParser.parseSoldierTable(HttpUtil.get("soldier_table.php"));
@@ -73,8 +90,13 @@ public class MercenaryService {
 					fireMercenary(m.getId());
 					i--;
 				} else {
-					rename(m.getId(), "良");
-					logger.debug("挑到次等苗：{}", dtl);
+					if(dtl.getPwr() > 3 && dtl.getSpd() > 3 && dtl.getDef() > 3 && dtl.getPrt() > 3 && dtl.getMaxHp() > 17) {
+						rename(m.getId(), "苗");
+						logger.debug("挑到优质苗：{}", dtl);
+					} else {
+						rename(m.getId(), "良");
+						logger.debug("挑到次等苗：{}", dtl);
+					}
 					trainMercenary(m.getId());
 					training++;
 				}
@@ -166,4 +188,75 @@ public class MercenaryService {
 		String response = HttpUtil.get("soldier_co.php?goto=showsol&soldier=" + id);
 		return MercenaryParser.parseDetail(response);
 	}
+
+	public static boolean startTraining(int id) {
+		HttpUtil.get("soldier_co.php?goto=train&soldier=" + id);
+		String response = HttpUtil.get("soldier_updata.php?goto=trainStart&soldier=" + id);
+		return response.startsWith("佣兵：");
+	}
+	/**************
+	 * 结束训练，并将m的状态置为闲置中
+	 * @param m
+	 */
+	public static void endTraining(Mercenary m) {
+		HttpUtil.get("soldier_co.php?goto=train&soldier=" + m.getId());
+		HttpUtil.get("soldier_updata.php?goto=trainEnd&soldier=" + m.getId());
+		m.setStatus(MercenaryStatus.rest);
+	}
+	/**************
+	 * 结束训练，需要调用方更新佣兵状态
+	 * @param id
+	 */
+	public static void endTraining(int id) {
+		HttpUtil.get("soldier_co.php?goto=train&soldier=" + id);
+		HttpUtil.get("soldier_updata.php?goto=trainEnd&soldier=" + id);
+	}
+	/**************
+	 * 易主
+	 * @param soldierId
+	 * @param username
+	 */
+	public static boolean giveTo(int soldierId, String username) throws SoldierBoundException {
+		String s = HttpUtil.get("soldier_co.php?goto=song&soldier=" + soldierId);
+		if(s.contains("绑定")) {
+			throw new SoldierBoundException(soldierId);
+		}
+		String giveResult = null;
+		try {
+			giveResult = HttpUtil.get("soldier_updata.php?goto=song&soldier="
+					+ soldierId + "&maintext="
+					+ URLEncoder.encode(username, "utf-8"));
+		} catch (UnsupportedEncodingException e) {
+		}
+		return giveResult.startsWith("易主完成");
+	}
+	
+	/*****************
+	 * 
+	 * @param soldierId
+	 * @return 一个String[2]。return[0]为进攻评价，return[1]为防守评价。
+	 */
+	public static String[] review(int soldierId) {
+		MoveService.moveTo(1126);//鲁09
+		HttpUtil.get("npc.php?npcid=314");//不关心第一次公主说的话
+		HttpUtil.get("npc.php?npcid=314&act=SOL_D");//第二次，公主打开佣兵列表
+		String s = NpcParser.parse(HttpUtil.get("npc.php?npcid=314&act=SOL_D2&solid=" + soldierId));
+		return NpcParser.parsePrincessReview(s);
+	}
+	
+	public static class SoldierBoundException extends RuntimeException {
+		private static final long serialVersionUID = 7509801092952060566L;
+		private int soldierId;
+		public SoldierBoundException(int soldierId) {
+			super();
+			this.soldierId = soldierId;
+		}
+		public int getSoldierId() {
+			return soldierId;
+		}
+		public void setSoldierId(int soldierId) {
+			this.soldierId = soldierId;
+		}
+	}
+
 }
