@@ -166,7 +166,7 @@ public class MercenaryService {
 			}
 		}
 	}
-	private static void rename(int id, String newName) {
+	public static void rename(int id, String newName) {
 		HttpUtil.get("soldier_co.php?goto=resetname&soldier=" + id);
 		try {
 			HttpUtil.get("soldier_updata.php?goto=resetname&soldier=" + id + "&maintext=" + URLEncoder.encode(newName, "UTF-8"));

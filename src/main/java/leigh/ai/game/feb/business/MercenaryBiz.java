@@ -99,7 +99,7 @@ public class MercenaryBiz {
 		}
 		PrintWriter pw = null;
 		try {
-			pw = new PrintWriter(new FileWriter(mLogFile, true));
+			pw = new PrintWriter(new FileWriter(mLogFile, true), true);
 		} catch (IOException e) {
 			logger.error("", e);
 			logM = false;
@@ -132,7 +132,8 @@ public class MercenaryBiz {
 			MultiAccountService.activate(i);
 			//获取佣兵列表状态
 			MercenaryService.update();
-			for(Mercenary m: MercenaryService.myMercenaries) {
+			for(int j = 0; j < MercenaryService.myMercenaries.size(); j++) {
+				Mercenary m = MercenaryService.myMercenaries.get(j);
 				if(!m.getStatus().equals(MercenaryStatus.train)) {
 					continue;
 				}
@@ -175,6 +176,7 @@ public class MercenaryBiz {
 				
 				if(atkOk && defOk) {
 					logger.info("练出合格佣兵：{}, {}/{}", detail.toString(), review[0], review[1]);
+					MercenaryService.rename(m.getId(), detail.getJob().name() + review[0] + "/" + review[1]);
 					while(!MercenaryService.giveTo(m.getId(), param.getPassTo().get(currentGiveto))) {
 						currentGiveto++;
 						if(currentGiveto >= param.getPassTo().size()) {
@@ -186,11 +188,14 @@ public class MercenaryBiz {
 						}
 					}
 					logger.debug("已转移给{}", param.getPassTo().get(currentGiveto));
+					j--;
 				} else {
 					MercenaryService.fireMercenary(m.getId());
+					j--;
 				}
 				
 				MultiAccountService.activate(i);
+				MercenaryService.update();
 			}
 			
 			MercenaryService.update();
@@ -201,9 +206,11 @@ public class MercenaryBiz {
 				MercenaryService.update();
 			}
 			int training = 0;
-			int trainingLimit = 5;
-			if(!JobService.isBefore1zhuan(PersonStatusService.myjob)) {
-				trainingLimit = 10;
+			int trainingLimit = 10;
+			if(JobService.isBefore1zhuan(PersonStatusService.myjob)) {
+				trainingLimit = 5;
+			} else if(PersonStatusService.goodCard) {
+				trainingLimit = 15;
 			}
 			for(Mercenary m: MercenaryService.myMercenaries) {
 				if(m.getStatus().equals(MercenaryStatus.train)) {
