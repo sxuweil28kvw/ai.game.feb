@@ -15,7 +15,7 @@ import leigh.ai.game.feb.service.MercenaryService;
 public class Test1 {
 	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException, InterruptedException {
 //		LoginService.login("藤堂志摩子", "kk82liewuxux");
-		MercenaryBiz.batchEndTraining("f:/f/g/feb/批量练兵.yml");
+		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵意甲.yml");
 //		Thread.sleep(1000 * 60 * 14);
 		
 	}

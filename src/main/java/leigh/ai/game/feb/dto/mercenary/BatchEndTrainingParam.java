@@ -10,6 +10,7 @@ public class BatchEndTrainingParam {
 	private String minDefReview;
 	private String reviewUser;
 	private String soldierReviewDataLog;
+	private boolean trainNew;
 	public List<String> getUsernames() {
 		return usernames;
 	}
@@ -51,5 +52,11 @@ public class BatchEndTrainingParam {
 	}
 	public void setSoldierReviewDataLog(String soldierReviewDataLog) {
 		this.soldierReviewDataLog = soldierReviewDataLog;
+	}
+	public boolean isTrainNew() {
+		return trainNew;
+	}
+	public void setTrainNew(boolean trainNew) {
+		this.trainNew = trainNew;
 	}
 }

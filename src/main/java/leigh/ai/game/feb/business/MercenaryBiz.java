@@ -73,7 +73,7 @@ public class MercenaryBiz {
 		}
 	}
 	
-	public static void batchEndTraining(String yml) {
+	public static void batchTraining(String yml) {
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		BatchEndTrainingParam param = null;
 		try {
@@ -174,7 +174,7 @@ public class MercenaryBiz {
 					}
 				}
 				
-				if(atkOk && defOk) {
+				if((atkOk && defOk) || review[0].startsWith("S") || review[1].startsWith("S")) {
 					logger.info("练出合格佣兵：{}, {}/{}", detail.toString(), review[0], review[1]);
 					MercenaryService.rename(m.getId(), detail.getJob().name() + review[0] + "/" + review[1]);
 					while(!MercenaryService.giveTo(m.getId(), param.getPassTo().get(currentGiveto))) {
@@ -199,6 +199,9 @@ public class MercenaryBiz {
 			}
 			
 			MercenaryService.update();
+			if(!param.isTrainNew()) {
+				continue;
+			}
 			
 			if(PersonStatusService.mahua > 45 &&
 					MercenaryService.limit - MercenaryService.myMercenaries.size() > 10) {
