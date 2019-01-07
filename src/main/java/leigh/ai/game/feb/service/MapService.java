@@ -32,6 +32,7 @@ public class MapService {
 				"data/map/aiteluliya.map",
 				"data/map/xifangsandao.map",
 				"data/map/beilun.map",
+				"data/map/saka.map",
 				"data/map/yiliya.map",
 				};
 		for(String map: maps) {
@@ -72,9 +73,12 @@ public class MapService {
 		map.get(2034).getNeighbours(Traffic.border).add(map.get(2033));//黑克境
 		map.get(2060).getNeighbours(Traffic.border).add(map.get(2016));//乌兰境
 		map.get(2016).getNeighbours(Traffic.border).add(map.get(2060));//乌兰境
-		
-		map.get(2127).getNeighbours(Traffic.border).add(map.get(2059));//乌兰境
-		map.get(2059).getNeighbours(Traffic.border).add(map.get(2127));//乌兰境
+		map.get(2127).getNeighbours(Traffic.border).add(map.get(2059));//边境苏恩和雷米城
+		map.get(2059).getNeighbours(Traffic.border).add(map.get(2127));//边境苏恩和雷米城
+		map.get(2156).getNeighbours(Traffic.border).add(map.get(2155));//银松境
+		map.get(2155).getNeighbours(Traffic.border).add(map.get(2156));//银松境
+		map.get(2171).getNeighbours(Traffic.border).add(map.get(2083));//哈瓦境
+		map.get(2083).getNeighbours(Traffic.border).add(map.get(2171));//哈瓦境
 		// 飞行-旧大陆
 		int[] airports = new int[] {
 				1152, 1137, 1128, 1123, 1122, 1119, 1149, 1113, 1204,
