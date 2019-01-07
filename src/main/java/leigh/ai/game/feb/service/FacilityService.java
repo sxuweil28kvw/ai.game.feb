@@ -257,7 +257,7 @@ public class FacilityService {
 	}
 	public static void repairWeapon(MyWeapon w) {
 		if(PersonStatusService.money < 2000) {
-			drawCash(19000);
+			drawCash(31000);
 		}
 		FacilityType[] types = null;
 		if(PersonStatusService.memberCard) {
@@ -265,11 +265,10 @@ public class FacilityService {
 		} else {
 			types = new FacilityType[] {FacilityType.weaponshopE, FacilityType.weaponshopD, FacilityType.weaponshopC};
 		}
-		MapPath path = MapService.findFacility(PersonStatusService.currentLocation, types);
-		MoveService.movePath(path);
+		MoveService.moveToFacility(types);
 		String positionCode = w.getPosition();
 		HttpUtil.get("shopwep.php");
-		FakeSleepUtil.sleep(2);
+		FakeSleepUtil.sleep(1);
 		HttpUtil.get("shopwep_co.php?goto=what&wrap=" + positionCode);
 		int price = WeaponShopParser.parseRepairPrice(HttpUtil.get("shopwep_co.php?goto=repair&wrap=" + positionCode));
 		if(price == 0) {
@@ -291,7 +290,7 @@ public class FacilityService {
 		} else {
 			types = new FacilityType[] {FacilityType.itemshop};
 		}
-		MoveService.movePath(MapService.findFacility(PersonStatusService.currentLocation, types));
+		MoveService.moveToFacility(types);
 		HttpUtil.get("shopits.php");
 		HttpUtil.get("shopits_co.php?goto=what&wrap=" + t.getPosition());
 		HttpUtil.get("shopits_co.php?goto=sell&wrap=" + t.getPosition());
@@ -319,6 +318,41 @@ public class FacilityService {
 		}
 		return shards;
 	}
+	
+	public static void repairItem(MyItem t) {
+		FacilityType[] facilities;
+		if(PersonStatusService.memberCard) {
+			facilities = new FacilityType[] {FacilityType.itemshop, FacilityType.itemshopMember};
+		} else {
+			facilities = new FacilityType[] {FacilityType.itemshop};
+		}
+		MoveService.moveToFacility(facilities);
+		HttpUtil.get("shopits_co.php?goto=what&wrap=" + t.getPosition());
+		String response = HttpUtil.get("shopits_co.php?goto=repair&wrap=" + t.getPosition());
+		if(response.contains("新的")) {
+			return;
+		}
+		if(!response.contains("修理大概要花")) {
+			logger.debug("{}无法修理", t.getName());
+			return;
+		}
+		int price = ItemShopParser.parseRepairPrice(response);
+		if(price > PersonStatusService.money) {
+			drawCash(48000);
+			MoveService.moveToFacility(facilities);
+			HttpUtil.get("shopits_co.php?goto=what&wrap=" + t.getPosition());
+			HttpUtil.get("shopits_co.php?goto=repair&wrap=" + t.getPosition());
+		}
+		response = HttpUtil.get("shopits_updata.php?goto=repair&wrap=" + t.getPosition());
+		logger.debug("修理了{}", t.getName());
+	}
+	
+	public static void repaireAllItems(List<MyItem> myItems) {
+		for(MyItem t: myItems) {
+			repairItem(t);
+		}
+	}
+	
 	public static boolean mercenary(int num) {
 		MoveService.moveToFacility(FacilityType.inn);
 		if(PersonStatusService.mahua < 5) {

@@ -241,7 +241,7 @@ public class MercenaryBiz {
 	}
 	private static void logMercenary(PrintWriter pw, MercenaryDetail md, String[] review) {
 		StringBuilder sb = new StringBuilder()
-				.append(md.getJob().name()).append(',')
+				.append(md.getJob().getName()).append(',')
 				.append(md.getMaxHp()).append(',')
 				.append(md.getPwr()).append(',')
 				.append(md.getAgi()).append(',')

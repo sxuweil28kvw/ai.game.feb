@@ -65,8 +65,14 @@ public class BagService {
 					Element tr = trs.get(i);
 					gi.setType(tr.child(0).text());
 					gi.setName(tr.child(1).text());
-					gi.setGivenBy(tr.child(2).text());
-					gi.setAmount(Integer.parseInt(tr.child(3).text()));
+					if(gi.getType().equals("资金")) {
+						// 麻花的错误：资金的时候有两列反了！
+						gi.setGivenBy(tr.child(3).text());
+						gi.setAmount(Integer.parseInt(tr.child(2).text()));
+					} else {
+						gi.setGivenBy(tr.child(2).text());
+						gi.setAmount(Integer.parseInt(tr.child(3).text()));
+					}
 					gi.setTime(tr.child(4).text());
 					gi.setAcceptUri(tr.child(5).child(0).attr("onclick").split("hatturn\\('", 2)[1].split("','", 2)[0]);
 					tmp.add(gi);

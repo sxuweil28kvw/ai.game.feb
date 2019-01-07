@@ -384,6 +384,20 @@ public class TeamRaidBiz {
 				logger.info("到达尤恩面前！");
 				return;
 			}
+			
+			MultiAccountService.activate(healerIndex);
+			int totalStaffAmount = 0;
+			for(MyItem t: PersonStatusService.items) {
+				if(Item.isHealingStaff(t.getName())) {
+					totalStaffAmount += t.getAmountLeft();
+				}
+			}
+			if(totalStaffAmount < 30) {
+				RaidService.exit();
+				FacilityService.repaireAllItems(PersonStatusService.items);
+				MoveService.enterRuin();
+			}
+			
 			MultiAccountService.activate(battlePerson);
 			if(PersonStatusService.HP < PersonStatusService.maxHP) {
 				teamHeal(healerIndex, battlePerson);
@@ -417,7 +431,6 @@ public class TeamRaidBiz {
 				ItemService.equip(Item.天马的羽毛M);
 				break;
 			case enemy:
-			case stopingEnemy:
 				if(whoEngagedFirstEnemy == -1) {
 					MultiAccountService.activate(battlePerson);
 					do {
@@ -427,6 +440,11 @@ public class TeamRaidBiz {
 							RaidService.move();
 						}
 					} while (RaidService.myPosition > firstEnemyPosition);
+					if(PersonStatusService.AP < 50) {
+						RaidService.addAp();
+					}
+					MultiAccountService.askForHelp();
+					PersonStatusService.AP -= 50;
 				} else if(whoEngagedFirstEnemy != battlePerson) {
 					MultiAccountService.activate(whoEngagedFirstEnemy);
 					if(PersonStatusService.AP < 50) {
@@ -443,9 +461,10 @@ public class TeamRaidBiz {
 					MultiAccountService.askForHelp();
 					PersonStatusService.AP -= 50;
 				}
+			case stopingEnemy:
 				
 				RaidStopReason rsr = RaidService.ruinBattle();
-     				while(rsr != null) {
+     			while(rsr != null) {
 					switch(rsr) {
 					case noAp:
 					case noHeal:
@@ -528,6 +547,14 @@ public class TeamRaidBiz {
 			if(!hasXingzhiguang) {
 				continue;
 			}
+			if(i == healerIndex) {
+				FacilityService.repaireAllItems(PersonStatusService.items);
+				for(MyItem t: PersonStatusService.items) {
+					if(Item.isHealingStaff(t.getName())) {
+						FacilityService.sellItem(t);
+					}
+				}
+			}
 			MoveService.moveTo(1161);
 			if(PersonStatusService.items.size() >= 5) {
 				logger.warn("{}道具栏已满！无法自动交星之光。");
@@ -559,9 +586,23 @@ public class TeamRaidBiz {
 		MultiAccountService.activate(healerIndex);
 		MyItem staff = null;
 		for(MyItem t: PersonStatusService.items) {
-			if(Item.isHealingStaff(t.getName())) {
+			if(Item.isHealingStaff(t.getName()) && t.getAmountLeft() > 1) {
 				staff = t;
 				break;
+			}
+		}
+		if(staff == null) {
+			int location = PersonStatusService.currentLocation;
+			RaidService.exit();
+			MoveService.moveToFacility(FacilityType.itemshop);
+			FacilityService.repaireAllItems(PersonStatusService.items);
+			if(location == -9) {
+				MoveService.enterRuin();
+			} else if(location <= -8) {
+				MoveService.enterTower(- location);
+			} else if(location <= -11) {
+				MoveService.enterTemple();
+				RaidService.moveNoBattleUntil(location, 0);
 			}
 		}
 		MultiAccountService.healMate(staff, battlePerson);

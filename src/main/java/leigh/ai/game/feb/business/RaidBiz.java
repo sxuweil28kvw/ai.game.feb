@@ -304,9 +304,7 @@ public class RaidBiz {
 		LoginService.password = p1;
 		LoginService.login();
 		BattleService.selfHeal(true);
-		ensureTiesi();
-		ensureHolywater();
-		ensureMedicine();
+		prepare();
 		
 		if(PersonStatusService.bagFree < 20) {
 			System.out.println("资源快满了！");

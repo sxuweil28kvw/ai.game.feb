@@ -199,7 +199,7 @@ public class MissionService {
 	}
 	
 	public static void halfCard() {
-		MoveService.moveTo(1102);
+		MoveService.moveTo(1101);
 		String yifuliemuSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=115"));
 		if(!yifuliemuSaid.contains("我想去协助将军")) {
 			logger.error("没有接到半价卡任务！");

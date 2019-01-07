@@ -1,5 +1,8 @@
 package leigh.ai.game.feb.parsers;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import leigh.ai.game.feb.service.PersonStatusService;
 
 public class ItemShopParser {
@@ -21,6 +24,19 @@ public class ItemShopParser {
 		}
 	}
 
+	public static int parseRepairPrice(String str) {
+		Pattern p = Pattern.compile("修理大概要花([0-9]+)金币~~");
+		Matcher m = p.matcher(str);
+		if(!m.find()) {
+			return 0;
+		}
+		String group = m.group(1);
+		if(group == null) {
+			return 0;
+		}
+		return Integer.parseInt(group);
+	}
+	
 	public static void afterBuy(String str) {
 		try {
 			PersonStatusService.money = Integer.parseInt(str.split("nowmoney','", 2)[1].split("'", 2)[0]);
