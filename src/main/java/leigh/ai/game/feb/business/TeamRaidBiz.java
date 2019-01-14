@@ -207,6 +207,11 @@ public class TeamRaidBiz {
 							}
 						}
 					}
+					while(RaidService.myPosition > position) {
+						RaidService.exit();
+						MoveService.enterTower();
+						RaidService.moveNoBattleUntil(location, position);
+					}
 					break;
 				default:
 					break;
@@ -345,7 +350,6 @@ public class TeamRaidBiz {
 		}
 		MultiAccountService.activate(leaderIndex);
 		Team team = TeamService.queryMyTeam();
-		logger.info(team.toString());
 		return team;
 	}
 	
@@ -603,6 +607,12 @@ public class TeamRaidBiz {
 			} else if(location <= -11) {
 				MoveService.enterTemple();
 				RaidService.moveNoBattleUntil(location, 0);
+			}
+		}
+		for(MyItem t: PersonStatusService.items) {
+			if(Item.isHealingStaff(t.getName()) && t.getAmountLeft() > 1) {
+				staff = t;
+				break;
 			}
 		}
 		MultiAccountService.healMate(staff, battlePerson);

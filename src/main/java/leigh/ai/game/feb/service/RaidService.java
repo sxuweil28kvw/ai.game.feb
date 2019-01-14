@@ -43,6 +43,7 @@ public class RaidService {
 	public static int myPosition = 0;
 	public static Map<Integer, List<RaidMapType>> raidMap;
 	public static Map<Integer, Set<Integer>> deadEnemies = new HashMap<Integer, Set<Integer>>();
+	public static boolean chasable = false;
 	static {
 		try {
 			initRaidMap();
@@ -149,6 +150,11 @@ public class RaidService {
 		return BattleResultParser.parse(s);
 		
 	}
+	public static BattleInfo battleX() {
+		String s = HttpUtil.get("battle.php?suodi=elite&Bout=X");
+		FakeSleepUtil.sleep(1, 2);
+		return BattleResultParser.parse(s);
+	}
 	
 	public static void readyForGuya() {
 //		LoginService.login();
@@ -186,7 +192,6 @@ public class RaidService {
 		MoveService.moveTo(MapService.map.get(PersonStatusService.currentLocation).getNeighbours(Traffic.raid_exit).iterator().next().getCode());
 	}
 	public static boolean selfHeal() {
-		PersonStatusService.update();
 		int healHp = PersonStatusService.maxHP - PersonStatusService.HP;
 		if(healHp <= 0) {
 			return true;
@@ -594,8 +599,14 @@ public class RaidService {
 			if(!RaidService.ensureWeapon()) {
 				return RaidStopReason.noWeapon;
 			}
-			result = battle(turns);
+			if(chasable) {
+				result = battleX();
+			} else {
+				result = battle(turns);
+				chasable = true;
+			}
 		} while(!result.getResult().equals(BattleResult.win));
+		chasable = false;
 		return null;
 	}
 

@@ -10,7 +10,7 @@ public class JobService {
 				|| job.equals("司祭")
 				|| job.equals("贤者")
 				|| job.equals("德鲁依")
-				|| job.equals("女武神")
+				|| job.equals("女武神(骑)")
 				|| job.equals("大司祭")
 				|| job.equals("大贤者")
 				|| job.equals("咒术师")

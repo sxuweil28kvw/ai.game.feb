@@ -9,9 +9,9 @@ public class TeamMaking {
 		TeamRaidBiz.team(new Account[] {
 				new Account("鸟居江利子", "kk82liewuxux"),
 				new Account("岛津由乃", "kk82liewuxux"),
-				new Account("细川可南子", "kk82liewuxux"),
-				new Account("水野蓉子", "kk82liewuxux"),
-				new Account("支仓令", "kk82liewuxux"),
+//				new Account("土萌萤", "kk82liewuxux"),
+//				new Account("水野蓉子", "kk82liewuxux"),
+//				new Account("佐藤圣", "kk82liewuxux"),
 		}, 0, true);
 //		TeamRaidBiz.team(new Account[] {
 //				new Account("许褚", "7777777"),

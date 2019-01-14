@@ -4,6 +4,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import leigh.ai.game.feb.parsers.BankParser;
 import leigh.ai.game.feb.parsers.ItemParser;
@@ -16,9 +21,6 @@ import leigh.ai.game.feb.service.status.MyStatus.MyItem;
 import leigh.ai.game.feb.service.status.MyStatus.MyWeapon;
 import leigh.ai.game.feb.util.FakeSleepUtil;
 import leigh.ai.game.feb.util.HttpUtil;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /****************
  * 
@@ -65,6 +67,9 @@ public class FacilityService {
 				2125, //西方三岛
 				2070, //贝伦
 				};
+		Integer[] weaponShopbs = new Integer[] {
+				1161, 2191, 2194, 2195,
+				};
 		Integer[] banks = new Integer[] {1152, 1119, 1198, 1156, 1102, 1179, 1161, 2049, 2194, 2036,
 				2125, //西方三岛
 				2070, //贝伦
@@ -86,7 +91,7 @@ public class FacilityService {
 		map.put(FacilityType.weaponshopC, Arrays.asList(weaponShopcs));
 		map.put(FacilityType.bank, Arrays.asList(banks));
 		map.put(FacilityType.inn, Arrays.asList(inns));
-		map.put(FacilityType.weaponshopB, Arrays.asList(new Integer[] {1161, 2194, 2195}));
+		map.put(FacilityType.weaponshopB, Arrays.asList(weaponShopbs));
 		map.put(FacilityType.itemshopMember, Arrays.asList(new Integer[] {1198, 2194, 2195}));
 		map.put(FacilityType.airport, Arrays.asList(airports));
 	}
@@ -332,11 +337,13 @@ public class FacilityService {
 		if(response.contains("新的")) {
 			return;
 		}
-		if(!response.contains("修理大概要花")) {
+		Pattern p = Pattern.compile("([0-9]+)金币");
+		Matcher m = p.matcher(response);
+		if(!m.find()) {
 			logger.debug("{}无法修理", t.getName());
 			return;
 		}
-		int price = ItemShopParser.parseRepairPrice(response);
+		int price = Integer.parseInt(m.group(1));
 		if(price > PersonStatusService.money) {
 			drawCash(48000);
 			MoveService.moveToFacility(facilities);
@@ -345,6 +352,8 @@ public class FacilityService {
 		}
 		response = HttpUtil.get("shopits_updata.php?goto=repair&wrap=" + t.getPosition());
 		logger.debug("修理了{}", t.getName());
+		// 游戏中不会调用这个，导致道具快捷栏不准确
+		ItemParser.itemsAfterUse(HttpUtil.get("useitem.php"));
 	}
 	
 	public static void repaireAllItems(List<MyItem> myItems) {
