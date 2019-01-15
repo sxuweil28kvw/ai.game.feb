@@ -14,6 +14,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import leigh.ai.game.feb.dto.bag.GivenItem;
 import leigh.ai.game.feb.dto.raid.HelpLaofanParam;
+import leigh.ai.game.feb.dto.skill.Skill;
 import leigh.ai.game.feb.dto.team.ReceivingTeamInviteException;
 import leigh.ai.game.feb.dto.team.Team;
 import leigh.ai.game.feb.parsers.ItemParser;
@@ -28,6 +29,7 @@ import leigh.ai.game.feb.service.MoveService;
 import leigh.ai.game.feb.service.MultiAccountService;
 import leigh.ai.game.feb.service.PersonStatusService;
 import leigh.ai.game.feb.service.RaidService;
+import leigh.ai.game.feb.service.SkillService;
 import leigh.ai.game.feb.service.TagangMissionService;
 import leigh.ai.game.feb.service.TeamService;
 import leigh.ai.game.feb.service.multiAccount.Account;
@@ -363,6 +365,7 @@ public class TeamRaidBiz {
 		team(accounts, healerIndex, true);
 		int battlePerson = 0;
 		MultiAccountService.activate(0);
+		SkillService.equip(Arrays.asList(Skill.护身L1), PersonStatusService.justiceCard);
 		ItemService.ensureItems(Item.铁丝, Item.天马的羽毛M, Item.会员圣水);
 		FacilityService.drawCash(30000);
 		MoveService.moveToFacility(FacilityType.weaponShops());

@@ -65,7 +65,7 @@ public class TagangBiz {
 				System.out.println(account[0] + " 领取塔港任务。");
 				LoginService.login(account[0], account[1]);
 				TagangMissionService.doMissions();
-				banana.add(account[0] + ": " + TagangMissionService.bananaMissionStatus);
+				banana.add(account[0] + "\t" + TagangMissionService.bananaMissionStatus);
 				LoginService.logout();
 			} catch(Exception e) {
 				e.printStackTrace();
