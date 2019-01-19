@@ -68,7 +68,7 @@ public class MultiAccountService {
 			.setUserId(PersonStatusService.userId)
 			.setWeapons(PersonStatusService.weapons)
 			;
-		int[] resources = new int[BagService.resourceNameList.length];
+		int[] resources = new int[BagService.resourceNameList.length + 1];
 		for(Integer resourceId: BagService.resourceAmount.keySet()) {
 			resources[resourceId] = BagService.resourceAmount.get(resourceId);
 		}

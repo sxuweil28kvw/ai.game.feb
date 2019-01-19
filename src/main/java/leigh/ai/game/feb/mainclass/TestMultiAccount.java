@@ -9,10 +9,10 @@ public class TestMultiAccount {
 		TeamRaidBiz.ruin(
 				new Account[] {
 						new Account("岛津由乃", "kk82liewuxux"),
-						new Account("细川可南子", "kk82liewuxux"),
-						new Account("姬宫千歌音", "kk82liewuxux"),
-						new Account("小笠原祥子", "kk82liewuxux"),
-						new Account("藤堂志摩子", "kk82liewuxux"),
+						new Account("海王满", "kk82liewuxux"),
+						new Account("黑岩射手", "kk82liewuxux"),
+						new Account("佐藤圣", "kk82liewuxux"),
+//						new Account("菱川六花", "kk82liewuxux"),
 				}, 1
 //				, 1
 		);

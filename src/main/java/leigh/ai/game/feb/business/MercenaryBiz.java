@@ -123,13 +123,20 @@ public class MercenaryBiz {
 			tmp[tmp.length - 1] = new Account(param.getReviewUser(), param.getPassword());
 			reviewer = tmp.length - 1;
 			reviewerTraining = false;
+			accounts = tmp;
 		}
-		MultiAccountService.login(accounts);
+//		MultiAccountService.login(accounts);
 		for(int i = 0; i < accounts.length; i++) {
 			if(i == reviewer && !reviewerTraining) {
 				continue;
 			}
-			MultiAccountService.activate(i);
+			
+			if(i == reviewer) {
+				LoginService.login(accounts[i].getU(), accounts[i].getP());
+			} else {
+				MultiAccountService.login(new Account[] {accounts[reviewer], accounts[i]});
+				MultiAccountService.activate(1);
+			}
 			//获取佣兵列表状态
 			MercenaryService.update();
 			for(int j = 0; j < MercenaryService.myMercenaries.size(); j++) {
@@ -148,8 +155,8 @@ public class MercenaryBiz {
 				}
 				if(i != reviewer) {
 					MercenaryService.giveTo(m.getId(), accounts[reviewer].getU());
+					MultiAccountService.activate(0);
 				}
-				MultiAccountService.activate(reviewer);
 				String[] review = MercenaryService.review(m.getId());
 				if(logM) {
 					logMercenary(pw, detail, review);
@@ -194,8 +201,10 @@ public class MercenaryBiz {
 					j--;
 				}
 				
-				MultiAccountService.activate(i);
-				MercenaryService.update();
+				if(i != reviewer) {
+					MultiAccountService.activate(1);
+					MercenaryService.update();
+				}
 			}
 			
 			MercenaryService.update();
@@ -215,6 +224,9 @@ public class MercenaryBiz {
 			} else if(PersonStatusService.goodCard) {
 				trainingLimit = 15;
 			}
+			if(PersonStatusService.justiceCard) {
+				trainingLimit = 25;
+			}
 			for(Mercenary m: MercenaryService.myMercenaries) {
 				if(m.getStatus().equals(MercenaryStatus.train)) {
 					training++;
@@ -233,6 +245,7 @@ public class MercenaryBiz {
 					}
 				}
 			}
+			LoginService.logout();
 		}
 		
 		if(pw != null) {

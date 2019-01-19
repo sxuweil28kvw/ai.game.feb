@@ -530,6 +530,15 @@ public class TeamRaidBiz {
 		}
 		
 		logger.info("遗迹打通！");
+		
+		MultiAccountService.activate(healerIndex);
+		FacilityService.repaireAllItems(PersonStatusService.items);
+		for(MyItem t: PersonStatusService.items) {
+			if(Item.isHealingStaff(t.getName())) {
+				FacilityService.sellItem(t);
+			}
+		}
+		
 		if(target > 0) {
 			return;
 		}
@@ -553,14 +562,6 @@ public class TeamRaidBiz {
 			}
 			if(!hasXingzhiguang) {
 				continue;
-			}
-			if(i == healerIndex) {
-				FacilityService.repaireAllItems(PersonStatusService.items);
-				for(MyItem t: PersonStatusService.items) {
-					if(Item.isHealingStaff(t.getName())) {
-						FacilityService.sellItem(t);
-					}
-				}
 			}
 			MoveService.moveTo(1161);
 			if(PersonStatusService.items.size() >= 5) {
