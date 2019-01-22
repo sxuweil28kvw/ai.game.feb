@@ -181,7 +181,8 @@ public class MercenaryBiz {
 					}
 				}
 				
-				if((atkOk && defOk) || review[0].startsWith("S") || review[1].startsWith("S")) {
+				if((atkOk && defOk) || review[0].startsWith("S") || review[1].startsWith("S")
+						|| detail.getSpd() >= 18) {
 					logger.info("练出合格佣兵：{}, {}/{}", detail.toString(), review[0], review[1]);
 					MercenaryService.rename(m.getId(), detail.getJob().name() + review[0] + "/" + review[1]);
 					while(!MercenaryService.giveTo(m.getId(), param.getPassTo().get(currentGiveto))) {

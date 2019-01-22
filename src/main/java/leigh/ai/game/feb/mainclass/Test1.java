@@ -16,11 +16,11 @@ public class Test1 {
 //		RaidBattleStrategy strat = om.readValue(new File("f:/f/g/feb/test1.yml"), RaidBattleStrategy.class);
 //		System.out.println(strat.getBattler());
 		
-		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵少女.yml");
-		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵红楼.yml");
-		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵意甲.yml");
-		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵德军.yml");
-//		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵长者.yml");
+//		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵德军.yml");
+//		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵意甲.yml");
+//		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵少女.yml");
+		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵长者.yml");
+//		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵红楼.yml");
 //		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵jedi.yml");
 //		MercenaryBiz.batchTraining("f:/f/g/feb/批量练兵主号.yml");
 	}
