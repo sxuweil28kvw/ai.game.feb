@@ -1,8 +1,5 @@
 package leigh.ai.game.feb.dto.raid;
 
-import leigh.ai.game.feb.dto.skill.Skill;
-import leigh.ai.game.feb.service.status.Item;
-
 public class RaidBattleStrategy {
 	private int battler;
 	private byte turns;
@@ -11,16 +8,16 @@ public class RaidBattleStrategy {
 	// 各武器对应的必须耐久量
 	private int[] weaponAmountNeeded;
 	// 需装备之道具
-	private Item item2Equip;
+	private String item2Equip;
 	// 必须持有之道具
-	private Item[] items;
+	private String[] items;
 	private int[] itemAmountNeeded;
 	// 小于或等于此HP值时治疗
 	private int healLeHp;
 	private int healer;
 	private String healItem;
 	private int healItemAmount;
-	private Skill[] skills;
+	private String[] skills;
 	public int getBattler() {
 		return battler;
 	}
@@ -44,18 +41,6 @@ public class RaidBattleStrategy {
 	}
 	public void setWeaponAmountNeeded(int[] weaponAmountNeeded) {
 		this.weaponAmountNeeded = weaponAmountNeeded;
-	}
-	public Item getItem2Equip() {
-		return item2Equip;
-	}
-	public void setItem2Equip(Item item2Equip) {
-		this.item2Equip = item2Equip;
-	}
-	public Item[] getItems() {
-		return items;
-	}
-	public void setItems(Item[] items) {
-		this.items = items;
 	}
 	public int[] getItemAmountNeeded() {
 		return itemAmountNeeded;
@@ -87,10 +72,22 @@ public class RaidBattleStrategy {
 	public void setHealItemAmount(int healItemAmount) {
 		this.healItemAmount = healItemAmount;
 	}
-	public Skill[] getSkills() {
+	public String getItem2Equip() {
+		return item2Equip;
+	}
+	public void setItem2Equip(String item2Equip) {
+		this.item2Equip = item2Equip;
+	}
+	public String[] getItems() {
+		return items;
+	}
+	public void setItems(String[] items) {
+		this.items = items;
+	}
+	public String[] getSkills() {
 		return skills;
 	}
-	public void setSkills(Skill[] skills) {
+	public void setSkills(String[] skills) {
 		this.skills = skills;
 	}
 }
