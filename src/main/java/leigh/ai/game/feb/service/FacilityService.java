@@ -114,7 +114,16 @@ public class FacilityService {
 		HttpUtil.get("shopbankc_updata.php?goto=gsms&maintext=" + saveMoney);
 		PersonStatusService.update();
 	}
-	public static void repairWeapon(int position) {
+	public static void repairWeapon(String position) {
+		if(PersonStatusService.canRepair == null) {
+			PersonStatusService.initCanRepair();
+		}
+		if(PersonStatusService.canRepair) {
+			if(WeaponService.repairBySkill(position)) {
+				return;
+			}
+		}
+		
 		if(PersonStatusService.money < 2000) {
 			drawCash(42000);
 		}
@@ -126,19 +135,24 @@ public class FacilityService {
 		}
 		MapPath path = MapService.findFacility(PersonStatusService.currentLocation, types);
 		MoveService.movePath(path);
-		String positionCode = position == 0 ? "E" : (position + "");
+		
 		HttpUtil.get("shopwep.php");
-		FakeSleepUtil.sleep(2);
-		HttpUtil.get("shopwep_co.php?goto=what&wrap=" + positionCode);
-		int price = WeaponShopParser.parseRepairPrice(HttpUtil.get("shopwep_co.php?goto=repair&wrap=" + positionCode));
+		FakeSleepUtil.sleep(1);
+		HttpUtil.get("shopwep_co.php?goto=what&wrap=" + position);
+		int price = WeaponShopParser.parseRepairPrice(HttpUtil.get("shopwep_co.php?goto=repair&wrap=" + position));
 		if(price == 0) {
 			return;
 		}
 		if(PersonStatusService.money < price) {
-			drawCash(29000 + price);
+			drawCash(20000 + price);
 		}
-		String response = HttpUtil.get("shopwep_updata.php?goto=repair&wrap=" + positionCode);
+		
+		String response = HttpUtil.get("shopwep_updata.php?goto=repair&wrap=" + position);
 		WeaponShopParser.parseAfterRepair(response);
+	}
+	public static void repairWeapon(int position) {
+		String positionCode = position == 0 ? "E" : (position + "");
+		repairWeapon(positionCode);
 	}
 	public static boolean hasFacility(int currentLocation, FacilityType type) {
 		return map.get(type).contains(currentLocation);
@@ -147,16 +161,19 @@ public class FacilityService {
 		if(targetMoney < PersonStatusService.money) {
 			return;
 		}
+		int mahua = (targetMoney - PersonStatusService.money) / 1000 + 1;
+		if(mahua > PersonStatusService.mahua) {
+			mahua = PersonStatusService.mahua;
+		}
+		if(mahua <= 0) {
+			return;
+		}
 		MapPath path = MapService.findFacilityExceptTraffics(PersonStatusService.currentLocation, new FacilityType[] {FacilityType.bank}, Traffic.ship);
 		MoveService.movePath(path);
 		HttpUtil.get("shopbanka.php");
 		HttpUtil.get("shopbanka_wi.php");
 		HttpUtil.get("shopbankc.php");
 		HttpUtil.get("shopbankc_wi.php?goto=msgs");
-		int mahua = (targetMoney - PersonStatusService.money) / 1000 + 1;
-		if(mahua > PersonStatusService.mahua) {
-			mahua = PersonStatusService.mahua;
-		}
 		HttpUtil.get("shopbankc_updata.php?goto=msgs&maintext=" + mahua);
 		if(logger.isDebugEnabled()) {
 			logger.debug("将" + mahua + "麻花兑换为金钱");
@@ -262,29 +279,7 @@ public class FacilityService {
 		}
 	}
 	public static void repairWeapon(MyWeapon w) {
-		if(PersonStatusService.money < 2000) {
-			drawCash(31000);
-		}
-		FacilityType[] types = null;
-		if(PersonStatusService.memberCard) {
-			types = new FacilityType[] {FacilityType.weaponshopE, FacilityType.weaponshopD, FacilityType.weaponshopC, FacilityType.weaponshopB};
-		} else {
-			types = new FacilityType[] {FacilityType.weaponshopE, FacilityType.weaponshopD, FacilityType.weaponshopC};
-		}
-		MoveService.moveToFacility(types);
-		String positionCode = w.getPosition();
-		HttpUtil.get("shopwep.php");
-		FakeSleepUtil.sleep(1);
-		HttpUtil.get("shopwep_co.php?goto=what&wrap=" + positionCode);
-		int price = WeaponShopParser.parseRepairPrice(HttpUtil.get("shopwep_co.php?goto=repair&wrap=" + positionCode));
-		if(price == 0) {
-			return;
-		}
-		if(PersonStatusService.money < price) {
-			drawCash(18000 + price);
-		}
-		String response = HttpUtil.get("shopwep_updata.php?goto=repair&wrap=" + positionCode);
-		WeaponShopParser.parseAfterRepair(response);
+		repairWeapon(w.getPosition());
 		if(logger.isDebugEnabled()) {
 			logger.debug("修理了" + w.getName());
 		}
@@ -316,7 +311,9 @@ public class FacilityService {
 			MyItem t = PersonStatusService.items.get(i);
 			if(t.getName().equals(itemName)) {
 				if(t.getAmountLeft() == fullShards) {
-					FacilityService.storeItem(t.getPosition());
+					if(!FacilityService.storeItem(t.getPosition())) {
+						ItemService.throwItem(t);
+					}
 				} else {
 					shards = t.getAmountLeft();
 				}

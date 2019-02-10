@@ -81,7 +81,7 @@ public class Assembled {
 				RaidBiz.ta5(args[0], args[1]);
 				break;
 			case "ta6":
-				RaidBiz.ta6(args[0]);
+				RaidBiz.ta6(args[0], args[1], args[2], args[3]);
 				break;
 			case "ta6once":
 				RaidBiz.ta6Once(args[0]);
@@ -143,5 +143,6 @@ public class Assembled {
 		System.out.println("挑苗子：zhaobing 角色  密码  留下的麻花数");
 		System.out.println("神殿挖宝：shendian 角色  密码");
 		System.out.println("沙漠挖宝：desert 角色  密码");
+		System.out.println("刷完塔6（女武骑需自备5本B光）：ta6 刺客名  密码 女武名 密码");
 	}
 }

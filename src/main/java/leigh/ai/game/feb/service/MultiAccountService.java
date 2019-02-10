@@ -68,6 +68,11 @@ public class MultiAccountService {
 			.setUserId(PersonStatusService.userId)
 			.setWeapons(PersonStatusService.weapons)
 			;
+		if(PersonStatusService.canRepair != null) {
+			status.setCanRepair(PersonStatusService.canRepair ? true: false);
+		} else {
+			status.setCanRepair(null);
+		}
 		int[] resources = new int[BagService.resourceNameList.length + 1];
 		for(Integer resourceId: BagService.resourceAmount.keySet()) {
 			resources[resourceId] = BagService.resourceAmount.get(resourceId);
@@ -114,6 +119,11 @@ public class MultiAccountService {
 		RaidService.myPosition = ps.getRaidMapPosition();
 		PersonStatusService.userId = ps.getUserId();
 		PersonStatusService.weapons = ps.getWeapons();
+		if(ps.getCanRepair() == null) {
+			PersonStatusService.canRepair = null;
+		} else {
+			PersonStatusService.canRepair = ps.getCanRepair() ? true : false;
+		}
 		BagService.resourceAmount.clear();
 		for(int j = 0; j < ps.getResources().length; j++) {
 			if(ps.getResources()[j] > 0) {

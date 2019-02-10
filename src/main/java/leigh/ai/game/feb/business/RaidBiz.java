@@ -460,181 +460,7 @@ public class RaidBiz {
 		String uVlk = prop.getProperty("圣女");
 		String pVlk = prop.getProperty("密码" + uVlk);
 		
-		LoginService.login(uAss, pAss);
-		if(PersonStatusService.currentLocation < 0) {
-			RaidService.exit();
-		}
-		LoginService.logout();
-		System.out.println(uVlk + "进塔卡进度");
-		LoginService.login(uVlk, pVlk);
-		
-		if(PersonStatusService.bagFree < 70) {
-			System.out.println("圣女资源快满了！");
-			LoginService.logout();
-			System.exit(0);
-		}
-		
-		prepare();
-		
-		MoveService.moveTo(1114);
-		MoveService.enterTower();
-		LoginService.logout();
-		
-		LoginService.login(uAss, pAss);
-		
-		if(PersonStatusService.bagFree < 15) {
-			System.out.println("刺客资源快满了！");
-			LoginService.logout();
-			System.exit(0);
-		}
-		BattleService.selfHeal(true);
-		prepare();
-		
-		MoveService.moveTo(1114);
-		MoveService.enterTower();
-		
-		toTa5(uAss);
-		
-		RaidService.ta5();
-		BattleInfo battleInfo = RaidService.battle(5);
-		while(!battleInfo.getResult().equals(BattleResult.win)) {
-			if(!RaidService.ensureWeapon()) {
-				reEnterTower();
-				toTa5(uAss);
-			}
-			if(PersonStatusService.AP < 10) {
-				if(!RaidService.addAp()) {
-					reEnterTower();
-					toTa5(uAss);
-				}
-			}
-			battleInfo = RaidService.battle(5);
-		}
-		//上6楼
-		RaidService.move();
-		LoginService.logout();
-		
-		LoginService.login(uVlk, pVlk);
-		//坐电梯到5楼；圣女打前4楼的逻辑尚未实现
-		MoveService.enterTower(5);
-		
-		battleTa6();
-		
-		LoginService.logout();
-		
-		LoginService.login(uAss, pAss);
-		// 此刻刺客在6楼第一格……目前登录时没有确定自己在副本中位置，挺坑的！
-		RaidService.myPosition = 0;
-		while(RaidService.myPosition < 24) {
-			RaidService.move();
-			if(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)
-					.equals(RaidMapType.chest)) {
-				RaidService.openChest(PersonStatusService.userId, uAss);
-			}
-		}
-		LoginService.logout();
-		logger.info("塔6第一轮完毕！");
-		
-		int ta6Times = 1;
-		
-		LoginService.login(uVlk, pVlk);
-		
-		RaidService.moveNoBattleUntil(24);
-		
-		String selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
-		List<String> summoners = NpcParser.parseSelenaSummoners(selenaSaid);
-		while(summoners.size() > 0) {
-			HttpUtil.get(summoners.get(0));
-			battleInfo = RaidService.battle(5);
-			while(!battleInfo.getResult().equals(BattleResult.win)) {
-				if(!RaidService.ensureWeapon()) {
-					RaidService.exit();
-					prepare();
-					MoveService.moveTo(1114);
-					MoveService.enterTower(5);
-					RaidService.move();
-					RaidService.moveNoBattleUntil(24);
-				}
-				if(battleInfo.getResult().equals(BattleResult.lose)) {
-					if(!RaidService.selfHeal()) {
-						RaidService.exit();
-						prepare();
-						MoveService.moveTo(1114);
-						MoveService.enterTower(5);
-						RaidService.move();
-						RaidService.moveNoBattleUntil(24);
-					}
-				} else if(PersonStatusService.HP < 35) {
-					if(!RaidService.selfHeal()) {
-						RaidService.exit();
-						prepare();
-						MoveService.moveTo(1114);
-						MoveService.enterTower(5);
-						RaidService.move();
-						RaidService.moveNoBattleUntil(24);
-					}
-				}
-				if(PersonStatusService.AP < 10) {
-					if(!RaidService.addAp()) {
-						RaidService.exit();
-						prepare();
-						MoveService.moveTo(1114);
-						MoveService.enterTower(5);
-						RaidService.move();
-						RaidService.moveNoBattleUntil(24);
-					}
-				}
-				battleInfo = RaidService.battle(5);
-			}
-			
-			RaidService.myPosition = 0;
-			RaidService.recallTa6Monsters();
-			
-			if(!RaidService.ensureWeapon()) {
-				RaidService.exit();
-				prepare();
-				MoveService.moveTo(1114);
-				MoveService.enterTower(5);
-				RaidService.move();
-			}
-			if(battleInfo.getResult().equals(BattleResult.lose)) {
-				if(!RaidService.selfHeal()) {
-					RaidService.exit();
-					prepare();
-					MoveService.moveTo(1114);
-					MoveService.enterTower(5);
-					RaidService.move();
-				}
-			} else if(PersonStatusService.HP < 35) {
-				if(!RaidService.selfHeal()) {
-					RaidService.exit();
-					prepare();
-					MoveService.moveTo(1114);
-					MoveService.enterTower(5);
-					RaidService.move();
-				}
-			}
-			if(PersonStatusService.AP < 10) {
-				if(!RaidService.addAp()) {
-					RaidService.exit();
-					prepare();
-					MoveService.moveTo(1114);
-					MoveService.enterTower(5);
-					RaidService.move();
-				}
-			}
-			
-			battleTa6();
-
-			logger.info("塔6第" + (++ta6Times) + "轮完毕");
-			if(ta6Times >= 5) {
-				break;
-			}
-			
-			RaidService.moveNoBattleUntil(24);
-			selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
-			summoners = NpcParser.parseSelenaSummoners(selenaSaid);
-		}
+		ta6(uAss, pAss, uVlk, pVlk);
 	}
 	
 	public static void ta6Once(String propertyFile) {
@@ -1009,5 +835,181 @@ public class RaidBiz {
 		LoginService.password = p;
 		LoginService.login();
 		RaidService.ta5();
+	}
+
+	public static void ta6(String uAss, String pAss, String uVlk, String pVlk) {
+		LoginService.login(uAss, pAss);
+		if(PersonStatusService.currentLocation < 0) {
+			RaidService.exit();
+		}
+		LoginService.logout();
+		System.out.println(uVlk + "进塔卡进度");
+		LoginService.login(uVlk, pVlk);
+		
+		if(PersonStatusService.bagFree < 70) {
+			System.out.println("圣女资源快满了！");
+			LoginService.logout();
+			System.exit(0);
+		}
+		
+		prepare();
+		
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+		LoginService.logout();
+		
+		LoginService.login(uAss, pAss);
+		
+		if(PersonStatusService.bagFree < 15) {
+			System.out.println("刺客资源快满了！");
+			LoginService.logout();
+			System.exit(0);
+		}
+		BattleService.selfHeal(true);
+		prepare();
+		
+		MoveService.moveTo(1114);
+		MoveService.enterTower();
+		
+		toTa5(uAss);
+		
+		RaidService.ta5();
+		BattleInfo battleInfo = RaidService.battle(5);
+		while(!battleInfo.getResult().equals(BattleResult.win)) {
+			if(!RaidService.ensureWeapon()) {
+				reEnterTower();
+				toTa5(uAss);
+			}
+			if(PersonStatusService.AP < 10) {
+				if(!RaidService.addAp()) {
+					reEnterTower();
+					toTa5(uAss);
+				}
+			}
+			battleInfo = RaidService.battle(5);
+		}
+		//上6楼
+		RaidService.move();
+		LoginService.logout();
+		
+		LoginService.login(uVlk, pVlk);
+		//坐电梯到5楼；圣女打前4楼的逻辑尚未实现
+		MoveService.enterTower(5);
+		
+		battleTa6();
+		
+		LoginService.logout();
+		
+		LoginService.login(uAss, pAss);
+		while(RaidService.myPosition < 24) {
+			RaidService.move();
+			if(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)
+					.equals(RaidMapType.chest)) {
+				RaidService.openChest(PersonStatusService.userId, uAss);
+			}
+		}
+		logger.info("塔6第一轮完毕！");
+		
+		int ta6Times = 1;
+		
+		String selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
+		List<String> summoners = NpcParser.parseSelenaSummoners(selenaSaid);
+		while(summoners.size() > 0) {
+			HttpUtil.get(summoners.get(0));
+			battleInfo = RaidService.battle(5);
+			while(!battleInfo.getResult().equals(BattleResult.win)) {
+				if(!RaidService.ensureWeapon()) {
+					RaidService.exit();
+					prepare();
+					MoveService.moveTo(1114);
+					MoveService.enterTower(5);
+					RaidService.move();
+					RaidService.moveNoBattleUntil(24);
+				}
+				if(battleInfo.getResult().equals(BattleResult.lose)) {
+					if(!RaidService.selfHeal()) {
+						RaidService.exit();
+						prepare();
+						MoveService.moveTo(1114);
+						MoveService.enterTower(5);
+						RaidService.move();
+						RaidService.moveNoBattleUntil(24);
+					}
+				} else if(PersonStatusService.HP < 35) {
+					if(!RaidService.selfHeal()) {
+						RaidService.exit();
+						prepare();
+						MoveService.moveTo(1114);
+						MoveService.enterTower(5);
+						RaidService.move();
+						RaidService.moveNoBattleUntil(24);
+					}
+				}
+				if(PersonStatusService.AP < 10) {
+					if(!RaidService.addAp()) {
+						RaidService.exit();
+						prepare();
+						MoveService.moveTo(1114);
+						MoveService.enterTower(5);
+						RaidService.move();
+						RaidService.moveNoBattleUntil(24);
+					}
+				}
+				battleInfo = RaidService.battle(5);
+			}
+			
+//			RaidService.myPosition = 0;
+			RaidService.recallTa6Monsters();
+			
+			LoginService.logout();
+			LoginService.login(uVlk, pVlk);
+			
+			if(!RaidService.ensureWeapon()) {
+				RaidService.exit();
+				prepare();
+				MoveService.moveTo(1114);
+				MoveService.enterTower(5);
+				RaidService.move();
+			}
+			if(battleInfo.getResult().equals(BattleResult.lose)) {
+				if(!RaidService.selfHeal()) {
+					RaidService.exit();
+					prepare();
+					MoveService.moveTo(1114);
+					MoveService.enterTower(5);
+					RaidService.move();
+				}
+			} else if(PersonStatusService.HP < 35) {
+				if(!RaidService.selfHeal()) {
+					RaidService.exit();
+					prepare();
+					MoveService.moveTo(1114);
+					MoveService.enterTower(5);
+					RaidService.move();
+				}
+			}
+			if(PersonStatusService.AP < 10) {
+				if(!RaidService.addAp()) {
+					RaidService.exit();
+					prepare();
+					MoveService.moveTo(1114);
+					MoveService.enterTower(5);
+					RaidService.move();
+				}
+			}
+			
+			battleTa6();
+
+			logger.info("塔6第" + (++ta6Times) + "轮完毕");
+			if(ta6Times >= 5) {
+				break;
+			}
+			
+			LoginService.logout();
+			LoginService.login(uAss, pAss);
+			RaidService.moveNoBattleUntil(24);
+			selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
+			summoners = NpcParser.parseSelenaSummoners(selenaSaid);
+		}
 	}
 }

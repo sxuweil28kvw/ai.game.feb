@@ -10,7 +10,6 @@ import leigh.ai.game.feb.service.PersonStatusService;
 import leigh.ai.game.feb.service.battle.BattleInfo;
 import leigh.ai.game.feb.service.battle.BattleResult;
 import leigh.ai.game.feb.service.status.MyStatus.MyItem;
-import leigh.ai.game.feb.util.FakeSleepUtil;
 
 public class ShuaBiz {
 	private static int bankSlots;
@@ -49,9 +48,6 @@ public class ShuaBiz {
 				}
 				PersonStatusService.update();
 				if(PersonStatusService.weapons.get(0).getAmountLeft() < 1) {
-					if(PersonStatusService.money < 2000) {
-						FacilityService.drawCash(42000);
-					}
 					FacilityService.repairWeapon(PersonStatusService.weapons.get(0));
 				}
 				if(info.getResult().equals(BattleResult.lose)) {

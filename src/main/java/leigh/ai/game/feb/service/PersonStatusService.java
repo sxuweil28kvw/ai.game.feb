@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import leigh.ai.game.feb.dto.skill.MySkill;
+import leigh.ai.game.feb.dto.skill.Skill;
 import leigh.ai.game.feb.parsers.PersonStatusParser;
 import leigh.ai.game.feb.service.status.Item;
 import leigh.ai.game.feb.service.status.MyStatus.MyItem;
@@ -33,6 +38,17 @@ public class PersonStatusService {
 	public static int bagFree;
 	public static int[] resources;
 	public static Map<String, String> weaponClass = new HashMap<String, String>(4);
+	//会不会修复；初始值是null
+	public static Boolean canRepair;
+	
+	private static final Logger logger = LoggerFactory.getLogger(PersonStatusService.class);
+	public static void initCanRepair() {
+		MySkill ms = SkillService.viewSkills();
+		canRepair = ms.getLearnt().contains(Skill.修复);
+		if(canRepair) {
+			logger.info("{}具备修复技能！", LoginService.username);
+		}
+	}
 	public static void update() {
 		String response = HttpUtil.get("equip.php");
 		PersonStatusParser.parse(response);

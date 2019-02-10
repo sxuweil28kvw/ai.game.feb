@@ -469,7 +469,7 @@ public class TeamRaidBiz {
 					PersonStatusService.AP -= 50;
 				}
 			case stopingEnemy:
-				
+				MultiAccountService.activate(battlePerson);
 				RaidStopReason rsr = RaidService.ruinBattle();
      			while(rsr != null) {
 					switch(rsr) {

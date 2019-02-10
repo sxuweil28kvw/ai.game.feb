@@ -32,6 +32,7 @@ public class PersonStatus {
 	private int raidMapPosition;
 	private Account account;
 	private Map<String, String> weaponClass = new HashMap<String, String>(4);
+	private Boolean canRepair;
 	public String getMyjob() {
 		return myjob;
 	}
@@ -188,7 +189,15 @@ public class PersonStatus {
 	public Map<String, String> getWeaponClass() {
 		return weaponClass;
 	}
-	public void setWeaponClass(Map<String, String> weaponClass) {
+	public PersonStatus setWeaponClass(Map<String, String> weaponClass) {
 		this.weaponClass = weaponClass;
+		return this;
+	}
+	public Boolean getCanRepair() {
+		return canRepair;
+	}
+	public PersonStatus setCanRepair(Boolean canRepair) {
+		this.canRepair = canRepair;
+		return this;
 	}
 }
