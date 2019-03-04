@@ -101,6 +101,7 @@ public class TagangBiz {
 				System.out.println(spl[0] + " 领取塔港任务。");
 				LoginService.login(spl[0], spl[1]);
 				TagangMissionService.takeMission();
+				banana.add(spl[0] + "\t" + TagangMissionService.bananaMissionStatus);
 				LoginService.logout();
 				line = br.readLine();
 			}
@@ -116,6 +117,9 @@ public class TagangBiz {
 				} catch (IOException e) {
 				}
 			}
+		}
+		for(String b: banana) {
+			System.out.println(b);
 		}
 		System.out.println("接塔港任务完毕。");
 	}

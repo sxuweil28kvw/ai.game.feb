@@ -24,23 +24,23 @@ public class MainPhpParser {
 			
 			String contentStartingFromCurrentLocation = mainPhp.split("<!-- 队伍部分结束 -->", 2)[1].split("</SCRIPT>", 2)[1].split("STYLEBLUR3\">", 2)[1];
 			String currentLocation = contentStartingFromCurrentLocation.split("</td>", 2)[0];
-			PersonStatusService.currentLocation = MapService.nameLookup.get(currentLocation);
-			if(PersonStatusService.currentLocation < 0) {
-				//在副本内！解析层内位置：
-				try {
-					RaidService.myPosition = Integer.parseInt(contentStartingFromCurrentLocation.split("<td>\\[", 2)[1].split("\\]", 2)[0]) - 1;
-					logger.debug("副本内位置{}", RaidService.myPosition);
-				} catch(Exception e) {
-					logger.warn("解析副本内位置失败？");
+			if(MapService.nameLookup.containsKey(currentLocation)) {
+				PersonStatusService.currentLocation = MapService.nameLookup.get(currentLocation);
+				if(PersonStatusService.currentLocation < 0) {
+					//在副本内！解析层内位置：
+					try {
+						RaidService.myPosition = Integer.parseInt(contentStartingFromCurrentLocation.split("<td>\\[", 2)[1].split("\\]", 2)[0]) - 1;
+						logger.debug("副本内位置{}", RaidService.myPosition);
+					} catch(Exception e) {
+						logger.warn("解析副本内位置失败？");
+					}
 				}
 			}
 			if(logger.isDebugEnabled()) {
 				logger.debug("HP={},maxHp={},AP={},currentLocation={},myjob={}",
 						PersonStatusService.HP, PersonStatusService.maxHP, PersonStatusService.AP,
-						MapService.map.get(PersonStatusService.currentLocation).getName(),
-						PersonStatusService.myjob);
+						currentLocation, PersonStatusService.myjob);
 			}
-			
 			return currentLocation;
 		} catch(Exception e) {
 			ParserExceptionHandler.handle(e, mainPhp, "解析main.php异常！");

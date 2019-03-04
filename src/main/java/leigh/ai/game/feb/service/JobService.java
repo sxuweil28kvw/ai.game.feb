@@ -19,7 +19,7 @@ public class JobService {
 		}
 		return false;
 	}
-	public static boolean isBefore1zhuan(String job) {
+	public static boolean is0zhuan(String job) {
 		if(job.equals("神官骑士")
 				|| job.equals("魔法师")
 				|| job.equals("黑暗法师")
@@ -35,6 +35,58 @@ public class JobService {
 				|| job.equals("斧骑士")
 				|| job.equals("海盗")
 				|| job.equals("天马骑士")
+				) {
+			return true;
+		}
+		return false;
+	}
+	public static boolean is1zhuan(String job) {
+		if(job.equals("勇者")
+				|| job.equals("剑豪")
+				|| job.equals("斗士")
+				|| job.equals("将军")
+				|| job.equals("狙击手")
+				|| job.equals("自由骑士")
+				|| job.equals("司祭")
+				|| job.equals("魔法骑士")
+				|| job.equals("贤者")
+				|| job.equals("德鲁伊")
+				|| job.equals("圣骑士")
+				|| job.equals("龙骑统帅")
+				|| job.equals("蛇龙骑士")
+				|| job.equals("刺客")
+				|| job.equals("铁骑士")
+				|| job.equals("狂战士")
+				|| job.equals("枪使")
+				|| job.equals("隼骑士")
+				|| job.equals("圣女")
+				) {
+			return true;
+		}
+		return false;
+	}
+	public static boolean is2zhuan(String job) {
+		if(job.equals("英雄")
+				|| job.equals("剑圣")
+				|| job.equals("猛士")
+				|| job.equals("元帅")
+				|| job.equals("神射手")
+				|| job.equals("丛林骑士")
+				|| job.equals("大司祭")
+				|| job.equals("摘星者")
+				|| job.equals("大贤者")
+				|| job.equals("咒术师")
+				|| job.equals("黄金骑士")
+				|| job.equals("白银骑士")
+				|| job.equals("圣龙骑士")
+				|| job.equals("翼龙骑士")
+				|| job.equals("密探")
+				|| job.equals("大师骑士")
+				|| job.equals("霸者")
+				|| job.equals("圣枪使")
+				|| job.equals("圣天马骑士")
+				|| job.equals("女武神(骑)")
+				|| job.equals("女武神(步)")
 				) {
 			return true;
 		}

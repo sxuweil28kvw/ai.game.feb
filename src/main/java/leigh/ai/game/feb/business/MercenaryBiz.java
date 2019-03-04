@@ -220,7 +220,7 @@ public class MercenaryBiz {
 			}
 			int training = 0;
 			int trainingLimit = 10;
-			if(JobService.isBefore1zhuan(PersonStatusService.myjob)) {
+			if(JobService.is0zhuan(PersonStatusService.myjob)) {
 				trainingLimit = 5;
 			} else if(PersonStatusService.goodCard) {
 				trainingLimit = 15;

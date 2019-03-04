@@ -559,6 +559,14 @@ public class RaidService {
 		if(PersonStatusService.weapons.get(0).getAmountLeft() > 0) {
 			return true;
 		}
+		if(PersonStatusService.canRepair == null) {
+			PersonStatusService.initCanRepair();
+		}
+		if(PersonStatusService.canRepair) {
+			if(WeaponService.repairBySkill("E")) {
+				return true;
+			}
+		}
 		for(int i = 1; i < PersonStatusService.weapons.size(); i++) {
 			if(PersonStatusService.weapons.get(i).getAmountLeft() > 0) {
 				PersonStatusService.equipWeapon(PersonStatusService.weapons.get(i));

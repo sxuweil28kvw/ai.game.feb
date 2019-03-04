@@ -551,8 +551,6 @@ public class RaidBiz {
 		LoginService.logout();
 		
 		LoginService.login(uAss, pAss);
-		// 此刻刺客在6楼第一格……目前登录时没有确定自己在副本中位置，挺坑的！
-		RaidService.myPosition = 0;
 		while(RaidService.myPosition < 24) {
 			RaidService.move();
 			if(RaidService.raidMap.get(PersonStatusService.currentLocation).get(RaidService.myPosition)
@@ -915,6 +913,15 @@ public class RaidBiz {
 		String selenaSaid = NpcParser.parse(HttpUtil.get("npc.php?npcid=302"));
 		List<String> summoners = NpcParser.parseSelenaSummoners(selenaSaid);
 		while(summoners.size() > 0) {
+			if(!RaidService.ensureWeapon()) {
+				RaidService.exit();
+				prepare();
+				MoveService.moveTo(1114);
+				MoveService.enterTower(5);
+				RaidService.move();
+				RaidService.moveNoBattleUntil(24);
+			}
+			
 			HttpUtil.get(summoners.get(0));
 			battleInfo = RaidService.battle(5);
 			while(!battleInfo.getResult().equals(BattleResult.win)) {

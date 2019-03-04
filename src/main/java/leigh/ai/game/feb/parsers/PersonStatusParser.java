@@ -75,11 +75,19 @@ public class PersonStatusParser {
 //			}
 			
 			try {
-				Element cardsTable = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(10).child(0).child(0);
-				PersonStatusService.halfCard = !cardsTable.child(0).child(1).child(0).hasAttr("style");
-				PersonStatusService.memberCard = !cardsTable.child(0).child(1).child(1).hasAttr("style");
-				PersonStatusService.goodCard = !cardsTable.child(0).child(2).child(0).hasAttr("style");
-				PersonStatusService.justiceCard = !cardsTable.child(0).child(2).child(1).hasAttr("style");
+				Element cardsTbody = doc.body().child(0).child(0).child(1).child(3).child(0).child(0).child(10).child(0).child(0).child(0);
+				if(cardsTbody.children().size() == 1) {//since 2019.03.03; 4 cards are in one row.
+					PersonStatusService.halfCard = !cardsTbody.child(0).child(0).hasAttr("style");
+					PersonStatusService.memberCard = !cardsTbody.child(0).child(1).hasAttr("style");
+					PersonStatusService.goodCard = !cardsTbody.child(0).child(2).hasAttr("style");
+					PersonStatusService.justiceCard = !cardsTbody.child(0).child(3).hasAttr("style");
+				} else {
+					// before 2019.03.03, cards were in two rows.
+					PersonStatusService.halfCard = !cardsTbody.child(1).child(0).hasAttr("style");
+					PersonStatusService.memberCard = !cardsTbody.child(1).child(1).hasAttr("style");
+					PersonStatusService.goodCard = !cardsTbody.child(2).child(0).hasAttr("style");
+					PersonStatusService.justiceCard = !cardsTbody.child(2).child(1).hasAttr("style");
+				}
 			} catch(Exception e) {
 				logger.warn("解析四张卡状态失败");
 			}

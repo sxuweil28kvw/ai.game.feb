@@ -9,7 +9,7 @@ public class WeaponService {
 			return false;
 		}
 		String prepareResponse = HttpUtil.get("equip_reg.php?type=wep&wrap=" + position);
-		if(!prepareResponse.contains("修复")) {
+		if(!prepareResponse.contains("修理")) {
 			return false;
 		}
 		String repairResponse = HttpUtil.get("equip_reg.php?goto=reg&type=wep&wrap=" + position);

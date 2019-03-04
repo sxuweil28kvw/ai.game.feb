@@ -92,11 +92,11 @@ public class ShuaBiz {
 			}
 			
 		}
-		if(!haveMedicine) {
-			BattleService.buyMedicine();
-		}
 		if(!haveHolywater) {
 			BattleService.buyHolywater();
+		}
+		if(!haveMedicine) {
+			BattleService.buyMedicine();
 		}
 		if(PersonStatusService.HP < PersonStatusService.maxHP * 0.4) {
 			BattleService.selfHeal();
