@@ -26,10 +26,12 @@ public class TagangMissionService {
 		checkMission();
 		if(mowuMissionStatus.equals(TagangMissionStatus.cooldown) && mojiangMissionStatus.equals(TagangMissionStatus.cooldown)) {
 			logger.info("塔港任务冷却中！");
-			return;
+//			return;
 		}
 		if(!mowuMissionStatus.equals(TagangMissionStatus.untake) && !mojiangMissionStatus.equals(TagangMissionStatus.untake)) {
-			return;
+			if(!"未接".equals(bananaMissionStatus)) {
+				return;
+			}
 		}
 		if(PersonStatusService.currentLocation != 1161) {
 			//去塔港
@@ -203,5 +205,38 @@ public class TagangMissionService {
 		FacilityService.saveMoney();
 		FacilityService.storeFullShards("魔石的碎片", 5);
 //		FacilityService.repairWeapon(0);
+	}
+	public static void takeMissionForce() {
+		checkMission();
+		if(mowuMissionStatus.equals(TagangMissionStatus.cooldown) && mojiangMissionStatus.equals(TagangMissionStatus.cooldown)) {
+			logger.info("塔港任务冷却中！");
+//			return;
+		}
+		if(!mowuMissionStatus.equals(TagangMissionStatus.untake) && !mojiangMissionStatus.equals(TagangMissionStatus.untake)) {
+			if(!"未接".equals(bananaMissionStatus)) {
+				return;
+			}
+		}
+		if(PersonStatusService.currentLocation != 1161) {
+			//去塔港
+			MapPath path1 = MapService.findPath(PersonStatusService.currentLocation, 1161);
+			logger.debug(path1.toString());
+			MoveService.movePath(path1, BattleConfig.never);
+		}
+		HttpUtil.get("npc.php?npcid=303B");
+		String tagangMissionResponse = HttpUtil.get("npc.php?npcid=303B&act=mist");
+		if(!mowuMissionStatus.equals(TagangMissionStatus.cooldown) && !mojiangMissionStatus.equals(TagangMissionStatus.cooldown)) {
+			try {
+			int[] tagangMissionPositions = TagangMissionParser.parse(tagangMissionResponse);
+			if(logger.isInfoEnabled()) {
+				logger.info("魔将在" + tagangMissionPositions[1] + ":" + MapService.map.get(tagangMissionPositions[1]).getName() + 
+						"，魔物在" + tagangMissionPositions[0] + ":" + MapService.map.get(tagangMissionPositions[0]).getName());
+			}
+			mowuLocation = tagangMissionPositions[0];
+			mojiangLocation = tagangMissionPositions[1];
+			} catch(Exception e) {
+			}
+		}
+		checkMission();
 	}
 }

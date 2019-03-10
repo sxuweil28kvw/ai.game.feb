@@ -11,6 +11,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import leigh.ai.game.feb.dto.mercenary.AdventureStatus;
 import leigh.ai.game.feb.parsers.MercenaryParser;
 import leigh.ai.game.feb.parsers.NpcParser;
 import leigh.ai.game.feb.service.mercenary.Mercenary;
@@ -18,6 +19,7 @@ import leigh.ai.game.feb.service.mercenary.MercenaryDetail;
 import leigh.ai.game.feb.service.mercenary.MercenaryJob;
 import leigh.ai.game.feb.service.mercenary.MercenaryStatus;
 import leigh.ai.game.feb.util.HttpUtil;
+import leigh.ai.game.feb.util.StringUtil;
 
 /*************
  * 佣兵相关
@@ -242,6 +244,60 @@ public class MercenaryService {
 		HttpUtil.get("npc.php?npcid=314&act=SOL_D");//第二次，公主打开佣兵列表
 		String s = NpcParser.parse(HttpUtil.get("npc.php?npcid=314&act=SOL_D2&solid=" + soldierId));
 		return NpcParser.parsePrincessReview(s);
+	}
+	
+	public static void adventureBatch() {
+		update();
+		for(Mercenary m: myMercenaries) {
+			if(!m.getStatus().equals(MercenaryStatus.adventure)) {
+				continue;
+			}
+			AdventureStatus as = adventureStatus(m.getId());
+			if(as == null) {
+				continue;
+			}
+			if(as.getStatus() != AdventureStatus.STATUS_ADVENTURE_FINISHED) {
+				continue;
+			}
+			String adventureResult = HttpUtil.get("soldier_updata.php?goto=explorerEnd&soldier=" + m.getId());
+			adventureResult = StringUtil.delTags(adventureResult);
+			logger.info("id={},name={},result={}", m.getId(), m.getName(), adventureResult);
+			m.setStatus(MercenaryStatus.rest);
+		}
+		
+		for(Mercenary m: myMercenaries) {
+			if(!m.getStatus().equals(MercenaryStatus.rest)) {
+				continue;
+			}
+			if(m.getName().matches("[0-7].*")) {
+				String dest = m.getName().substring(0, 1);
+				String response = HttpUtil.get("soldier_updata.php?goto=explorerStart&target=" + dest + "&soldier=" + m.getId());
+				if(!response.startsWith("目的地：")) {
+					logger.warn(response);
+					break;
+				}
+			}
+		}
+	}
+	
+	public static AdventureStatus adventureStatus(int soldierId) {
+		AdventureStatus ret = new AdventureStatus();
+		String rsps = HttpUtil.get("soldier_co.php?goto=explorer&soldier=" + soldierId);
+		if(rsps.startsWith("佣兵正在探险")) {
+			String[] spl = rsps.split("<br>");
+			ret.setAdventurePlace(spl[1].substring(5));
+			if(spl[2].contains("探险完成了")) {
+				ret.setStatus(AdventureStatus.STATUS_ADVENTURE_FINISHED);
+			} else {
+				ret.setStatus(AdventureStatus.STATUS_ON_ADVENTURE);
+			}
+		} else if(rsps.startsWith("想要派佣兵")) {
+			ret.setStatus(AdventureStatus.STATUS_NO_ADVENTURE);
+		} else {
+			logger.error("无法解析的佣兵探险状态：{}", rsps);
+			return null;
+		}
+		return ret;
 	}
 	
 	public static class SoldierBoundException extends RuntimeException {

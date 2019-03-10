@@ -27,7 +27,7 @@ public class Assembled {
 				TagangBiz.tagang(args);
 				break;
 			case "taketagang":
-				TagangBiz.takeTagang(args);
+				TagangBiz.takeTagangForce(args);
 				break;
 			case "tagangmowu":
 				TagangBiz.onlyMowu(args);

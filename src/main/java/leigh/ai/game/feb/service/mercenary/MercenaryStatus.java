@@ -4,5 +4,6 @@ public enum MercenaryStatus {
 	train,
 	guard,
 	rest,
+	adventure,
 	;
 }

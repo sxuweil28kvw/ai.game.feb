@@ -75,11 +75,14 @@ public class MercenaryParser {
 				if(name.contains("[")) {
 					if(name.endsWith("[训]")) {
 						m.setStatus(MercenaryStatus.train);
-						name = name.substring(0, name.length() - 3);
 					} else if(name.endsWith("[城]")) {
 						m.setStatus(MercenaryStatus.guard);
-						name = name.substring(0, name.length() - 3);
+					} else if(name.endsWith("[探]")) {
+						m.setStatus(MercenaryStatus.adventure);
 					}
+					name = name.substring(0, name.length() - 3);
+				} else {
+					m.setStatus(MercenaryStatus.rest);
 				}
 				m.setName(name);
 				MercenaryService.myMercenaries.add(m);
