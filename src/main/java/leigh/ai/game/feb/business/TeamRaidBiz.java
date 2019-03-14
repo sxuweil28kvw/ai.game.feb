@@ -83,6 +83,11 @@ public class TeamRaidBiz {
 						RaidService.move();
 					}
 				} while (RaidService.myPosition > firstEnemyPosition);
+				if(PersonStatusService.AP < 50) {
+					RaidService.addAp();
+				}
+				MultiAccountService.askForHelp();
+				PersonStatusService.AP -= 50;
 			} else if(whoEngagedFirstEnemy != battlePerson) {
 				MultiAccountService.activate(whoEngagedFirstEnemy);
 				if(PersonStatusService.AP < 50) {

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -266,5 +267,24 @@ public class MercenaryBiz {
 				.append(review[0]).append(',')
 				.append(review[1]);
 		pw.println(sb.toString());
+	}
+	public static void batchAdventure(String file) {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String line = br.readLine();
+			while(line != null) {
+				if(line.startsWith("#")) {
+					continue;
+				}
+				String[] account = line.split("=");
+				LoginService.login(account[0], account[1]);
+				MercenaryService.adventureBatch();
+				LoginService.logout();
+				line = br.readLine();
+			}
+			br.close();
+		} catch (IOException e) {
+			logger.error("", e);
+		}
 	}
 }

@@ -563,7 +563,7 @@ public class RaidBiz {
 	}
 	
 
-	private static void battleTa6() {
+	public static void battleTa6() {
 		BattleInfo battleInfo = null;
 		w6:
 			while(RaidService.myPosition < 22) {

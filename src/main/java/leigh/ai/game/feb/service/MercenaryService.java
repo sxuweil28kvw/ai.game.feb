@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -265,12 +267,14 @@ public class MercenaryService {
 			m.setStatus(MercenaryStatus.rest);
 		}
 		
+		Pattern p = Pattern.compile("\\[[NSRU]+\\]([0-7]).*");
 		for(Mercenary m: myMercenaries) {
 			if(!m.getStatus().equals(MercenaryStatus.rest)) {
 				continue;
 			}
-			if(m.getName().matches("[0-7].*")) {
-				String dest = m.getName().substring(0, 1);
+			Matcher matcher = p.matcher(m.getName());
+			if(matcher.find()) {
+				String dest = matcher.group(1);
 				String response = HttpUtil.get("soldier_updata.php?goto=explorerStart&target=" + dest + "&soldier=" + m.getId());
 				if(!response.startsWith("目的地：")) {
 					logger.warn(response);

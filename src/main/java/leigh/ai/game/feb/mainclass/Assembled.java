@@ -107,6 +107,9 @@ public class Assembled {
 			case "train":
 				MercenaryBiz.batchTraining(args[0]);
 				break;
+			case "tanxian":
+				MercenaryBiz.batchAdventure(args[0]);
+				break;
 			case "shendian":
 				LoginService.login(args[0], args[1]);
 				System.out.println(WabaoService.shrine());
