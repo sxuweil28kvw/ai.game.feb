@@ -145,6 +145,7 @@ public class MercenaryBiz {
 				if(!m.getStatus().equals(MercenaryStatus.train)) {
 					continue;
 				}
+				MercenaryDetail originDetail = MercenaryService.queryDetail(m.getId());
 				//停止训练
 				MercenaryService.endTraining(m);
 				//查询佣兵详细信息
@@ -185,7 +186,11 @@ public class MercenaryBiz {
 				if((atkOk && defOk) || review[0].startsWith("S") || review[1].startsWith("S")
 						|| detail.getSpd() >= 18) {
 					logger.info("练出合格佣兵：{}, {}/{}", detail.toString(), review[0], review[1]);
-					MercenaryService.rename(m.getId(), detail.getJob().name() + review[0] + "/" + review[1]);
+					String newName = detail.getJob().name() + review[0]
+							+ (review[0].charAt(review[0].length() - 1) == review[1].charAt(0) ? "/" : "") + review[1]
+							+ originDetail.getHp() + originDetail.getPwr() + originDetail.getSpd()
+							+ originDetail.getDef() + originDetail.getPrt();
+					MercenaryService.rename(m.getId(), newName);
 					while(!MercenaryService.giveTo(m.getId(), param.getPassTo().get(currentGiveto))) {
 						currentGiveto++;
 						if(currentGiveto >= param.getPassTo().size()) {

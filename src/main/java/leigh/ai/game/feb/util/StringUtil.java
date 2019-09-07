@@ -8,6 +8,10 @@ public class StringUtil {
 		for(int i = 0; i < len; ) {
 			if(html.charAt(i) != '<') {
 				int firstLeft = html.indexOf('<', i);
+				if(firstLeft == -1) {
+					ret.append(html.substring(i));
+					break;
+				}
 				ret.append(html.substring(i, firstLeft));
 				ret.append('\t');
 				i = firstLeft;
